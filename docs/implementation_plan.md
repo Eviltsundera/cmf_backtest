@@ -261,9 +261,11 @@ top-of-book. Fill logic пока только lifecycle transition; услови
 
 ---
 
-## T6. FillModel: симулятор исполнения
+## T6. FillModel: симулятор исполнения [done]
 
 **Цель:** определять, исполнились ли активные ордера на текущем market event'е.
+
+**Статус:** done 2026-05-08.
 
 **Подзадачи:**
 - Правила (конфигурируемо):
@@ -276,13 +278,20 @@ top-of-book. Fill logic пока только lifecycle transition; услови
 - Latency model заглушкой (поля есть, обработка = noop).
 
 **DoD:**
-- [ ] Юнит-тесты:
+- [x] Юнит-тесты:
   - buy limit при trade_price <= limit → fill;
   - buy limit при trade_price > limit → нет fill;
   - симметричные кейсы для sell;
   - fallback на best_quote при отсутствии trade.
-- [ ] Интеграционный тест: синтетический сценарий «bid=99, ask=101, trade@99 → buy filled; trade@101 → sell filled; inventory=0».
-- [ ] При `fees=0` round-trip fills дают `pnl = (sell_px - buy_px) * qty` точно.
+- [x] Интеграционный тест: синтетический сценарий «bid=99, ask=101, trade@99 → buy filled; trade@101 → sell filled; inventory=0».
+- [x] При `fees=0` round-trip fills дают `pnl = (sell_px - buy_px) * qty` точно.
+
+**Итог:** добавлен `lob::execution::FillModel` с configurable
+`fill_reference` (`trade_price`, `best_quote`, `mid_price`), directional
+fill-rules для buy/sell, fallback на best quote для non-trade events,
+conservative `fill_price = limit_price`, maker/taker fees и latency noop field.
+`fill_active_orders` работает поверх `OrderManager`, возвращает fills и
+переводит исполненные ордера в `FILLED`. Partial fills пока не включены в MVP.
 
 ---
 

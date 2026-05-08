@@ -126,6 +126,7 @@ public:
   [[nodiscard]] const Order *find_active_order(OrderId order_id) const;
   [[nodiscard]] bool is_active(OrderId order_id) const;
   [[nodiscard]] std::size_t active_count() const;
+  [[nodiscard]] std::vector<OrderId> active_order_ids() const;
   [[nodiscard]] Quantity active_exposure_lots() const;
   [[nodiscard]] const std::vector<OrderLifecycleEvent> &event_log() const;
 

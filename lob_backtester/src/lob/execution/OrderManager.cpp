@@ -269,6 +269,10 @@ std::size_t OrderManager::active_count() const {
   return active_order_ids_.size();
 }
 
+std::vector<OrderId> OrderManager::active_order_ids() const {
+  return std::vector<OrderId>(active_order_ids_.begin(), active_order_ids_.end());
+}
+
 Quantity OrderManager::active_exposure_lots() const {
   Quantity exposure = 0;
   for (const OrderId order_id : active_order_ids_) {

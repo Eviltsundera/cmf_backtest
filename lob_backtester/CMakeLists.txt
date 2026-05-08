@@ -56,6 +56,7 @@ add_library(
   lob_core STATIC
   src/lob/book/OrderBook.cpp
   src/lob/data/CsvDataSource.cpp
+  src/lob/execution/FillModel.cpp
   src/lob/execution/OrderManager.cpp
   src/lob/features/FeatureEngine.cpp
   src/lob/utils/Config.cpp)
@@ -84,6 +85,7 @@ if(BUILD_TESTING)
     lob_tests
     tests/config_smoke_test.cpp
     tests/data_source_test.cpp
+    tests/fill_model_test.cpp
     tests/feature_engine_test.cpp
     tests/order_manager_test.cpp
     tests/order_book_test.cpp)

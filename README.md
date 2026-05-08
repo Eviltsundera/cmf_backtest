@@ -20,12 +20,14 @@ Implemented:
   microprice proxy, and rolling mid-return volatility.
 - OrderManager lifecycle for limit order submit/cancel/replace/fill, risk gates,
   and `orders.csv` logging.
+- FillModel for trade-price, best-quote, and mid-price execution checks with
+  maker/taker fee accounting.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
   k-way merge, sample replay, order-book invariants, feature formulas, and OMS
-  lifecycle rules.
+  lifecycle/fill rules.
 
-Next planned task: T6, fill simulation.
+Next planned task: T7, portfolio accounting and metrics.
 
 ## Repository Layout
 
