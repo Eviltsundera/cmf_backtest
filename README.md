@@ -14,11 +14,13 @@ Implemented:
 - Streaming CSV DataLoader for `lob.csv`, `trades.csv`, and optional
   `depth_updates.csv`.
 - Normalized `MarketEvent` stream ordered by `(ts_ns, seq)`.
+- Market-By-Price `OrderBook` with snapshot/update replay and crossed-book
+  recovery policies.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
-  k-way merge, and sample replay.
+  k-way merge, sample replay, and order-book invariants.
 
-Next planned task: T3, Market-By-Price `LOBBuilder` / `OrderBook`.
+Next planned task: T4, order-book `FeatureEngine`.
 
 ## Repository Layout
 

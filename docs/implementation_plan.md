@@ -162,9 +162,11 @@ Loader читает `lob.csv`, `trades.csv` и опциональный `depth_u
 
 ---
 
-## T3. LOBBuilder: реконструкция книги (Market-By-Price)
+## T3. LOBBuilder: реконструкция книги (Market-By-Price) [done]
 
 **Цель:** поддерживать актуальную агрегированную лимитную книгу.
+
+**Статус:** done 2026-05-08.
 
 **Подзадачи:**
 - `OrderBook`:
@@ -177,13 +179,21 @@ Loader читает `lob.csv`, `trades.csv` и опциональный `depth_u
 - Версионирование snapshot — `snapshot_id` для walk-forward проверок.
 
 **DoD:**
-- [ ] Юнит-тесты:
+- [x] Юнит-тесты:
   - apply_snapshot восстанавливает книгу из 0;
   - apply_update добавляет/обновляет/удаляет уровень;
   - после серии операций `best_bid < best_ask`;
   - детекция crossed book, политика recovery срабатывает.
-- [ ] Property-based тест (или fuzz): применение случайных update'ов не приводит к UB и сохраняет инвариант.
-- [ ] Бенчмарк `apply_update`: ≥ 1M ops/sec на одном ядре (sanity для replay).
+- [x] Property-based тест (или fuzz): применение случайных update'ов не приводит к UB и сохраняет инвариант.
+- [x] Бенчмарк `apply_update`: ≥ 1M ops/sec на одном ядре (sanity для replay).
+
+**Итог:** добавлен `lob::book::OrderBook` для Market-By-Price книги с bid/ask
+maps, `apply_snapshot`, `apply_update`, `apply_event`, top-of-book API,
+`mid`, `spread`, доступом к уровням, `max_depth`, `snapshot_id` и политиками
+`Reject`, `DropCrossingLevels`, `IgnoreWithWarning` для locked/crossed book.
+Тесты покрывают snapshot rebuild, update add/change/delete, event application,
+strict `best_bid < best_ask`, recovery/rollback policy и deterministic fuzz.
+Release benchmark на локальной сборке: `18,895,363 apply_update ops/sec`.
 
 ---
 
