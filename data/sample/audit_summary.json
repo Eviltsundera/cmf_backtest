@@ -1,0 +1,1481 @@
+{
+  "event_counts": {
+    "book_snapshot_25": 1036690,
+    "trade": 21864989
+  },
+  "files": [
+    {
+      "amount_max": null,
+      "amount_min": null,
+      "column_profiles": [
+        {
+          "example": "0",
+          "max": 9999.0,
+          "min": 0.0,
+          "name": "row_id",
+          "types": [
+            "int"
+          ]
+        },
+        {
+          "example": "1722470402038431",
+          "max": 1722475401975971.0,
+          "min": 1722470402038431.0,
+          "name": "local_timestamp",
+          "types": [
+            "int"
+          ]
+        },
+        {
+          "example": "0.0110436",
+          "max": 0.0111441,
+          "min": 0.0109715,
+          "name": "asks[0].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "121492.0",
+          "max": 18946617.0,
+          "min": 1.0,
+          "name": "asks[0].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110435",
+          "max": 0.011144,
+          "min": 0.0109714,
+          "name": "bids[0].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "103687.0",
+          "max": 8218308.0,
+          "min": 3.0,
+          "name": "bids[0].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110438",
+          "max": 0.0111444,
+          "min": 0.0109716,
+          "name": "asks[1].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "4663.0",
+          "max": 7205984.0,
+          "min": 195.0,
+          "name": "asks[1].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110433",
+          "max": 0.0111437,
+          "min": 0.0109711,
+          "name": "bids[1].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "36226.0",
+          "max": 4791808.0,
+          "min": 5.0,
+          "name": "bids[1].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110444",
+          "max": 0.0111445,
+          "min": 0.0109717,
+          "name": "asks[2].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "59430.0",
+          "max": 5999411.0,
+          "min": 261.0,
+          "name": "asks[2].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110432",
+          "max": 0.0111436,
+          "min": 0.0109708,
+          "name": "bids[2].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "363479.0",
+          "max": 8992398.0,
+          "min": 2.0,
+          "name": "bids[2].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110445",
+          "max": 0.0111446,
+          "min": 0.0109719,
+          "name": "asks[3].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "41330.0",
+          "max": 7290493.0,
+          "min": 188.0,
+          "name": "asks[3].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110431",
+          "max": 0.0111435,
+          "min": 0.0109705,
+          "name": "bids[3].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "151775.0",
+          "max": 9358456.0,
+          "min": 2.0,
+          "name": "bids[3].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110446",
+          "max": 0.0111447,
+          "min": 0.010972,
+          "name": "asks[4].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "39907.0",
+          "max": 19735863.0,
+          "min": 129.0,
+          "name": "asks[4].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110429",
+          "max": 0.0111434,
+          "min": 0.01097,
+          "name": "bids[4].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "36226.0",
+          "max": 8992398.0,
+          "min": 9.0,
+          "name": "bids[4].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110447",
+          "max": 0.0111449,
+          "min": 0.0109722,
+          "name": "asks[5].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "82496.0",
+          "max": 8725823.0,
+          "min": 129.0,
+          "name": "asks[5].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110425",
+          "max": 0.0111432,
+          "min": 0.0109699,
+          "name": "bids[5].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "36226.0",
+          "max": 8660216.0,
+          "min": 146.0,
+          "name": "bids[5].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110448",
+          "max": 0.011145,
+          "min": 0.0109723,
+          "name": "asks[6].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "66092.0",
+          "max": 7224531.0,
+          "min": 366.0,
+          "name": "asks[6].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110423",
+          "max": 0.0111431,
+          "min": 0.0109693,
+          "name": "bids[6].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "116549.0",
+          "max": 9890492.0,
+          "min": 6.0,
+          "name": "bids[6].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110449",
+          "max": 0.0111452,
+          "min": 0.0109724,
+          "name": "asks[7].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "38544.0",
+          "max": 7919317.0,
+          "min": 366.0,
+          "name": "asks[7].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110421",
+          "max": 0.011143,
+          "min": 0.0109692,
+          "name": "bids[7].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "36226.0",
+          "max": 6717120.0,
+          "min": 451.0,
+          "name": "bids[7].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.011045",
+          "max": 0.0111453,
+          "min": 0.0109725,
+          "name": "asks[8].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "175716.0",
+          "max": 9856579.0,
+          "min": 451.0,
+          "name": "asks[8].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.011042",
+          "max": 0.0111429,
+          "min": 0.0109691,
+          "name": "bids[8].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "238607.0",
+          "max": 5823420.0,
+          "min": 451.0,
+          "name": "bids[8].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110452",
+          "max": 0.0111454,
+          "min": 0.0109726,
+          "name": "asks[9].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "85216.0",
+          "max": 9874530.0,
+          "min": 366.0,
+          "name": "asks[9].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110419",
+          "max": 0.0111428,
+          "min": 0.010969,
+          "name": "bids[9].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "261840.0",
+          "max": 9853840.0,
+          "min": 450.0,
+          "name": "bids[9].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110453",
+          "max": 0.0111455,
+          "min": 0.0109727,
+          "name": "asks[10].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "39165.0",
+          "max": 9856579.0,
+          "min": 428.0,
+          "name": "asks[10].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110418",
+          "max": 0.0111425,
+          "min": 0.0109689,
+          "name": "bids[10].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "102775.0",
+          "max": 9890492.0,
+          "min": 10.0,
+          "name": "bids[10].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110454",
+          "max": 0.0111456,
+          "min": 0.0109728,
+          "name": "asks[11].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "193001.0",
+          "max": 8732884.0,
+          "min": 450.0,
+          "name": "asks[11].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110417",
+          "max": 0.0111424,
+          "min": 0.0109688,
+          "name": "bids[11].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "37721.0",
+          "max": 9856074.0,
+          "min": 10.0,
+          "name": "bids[11].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110455",
+          "max": 0.0111457,
+          "min": 0.0109729,
+          "name": "asks[12].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "221020.0",
+          "max": 10878478.0,
+          "min": 450.0,
+          "name": "asks[12].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110415",
+          "max": 0.0111423,
+          "min": 0.0109687,
+          "name": "bids[12].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "20000.0",
+          "max": 9354933.0,
+          "min": 450.0,
+          "name": "bids[12].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110456",
+          "max": 0.0111458,
+          "min": 0.0109732,
+          "name": "asks[13].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "86025.0",
+          "max": 9856579.0,
+          "min": 129.0,
+          "name": "asks[13].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110414",
+          "max": 0.0111422,
+          "min": 0.0109685,
+          "name": "bids[13].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "155832.0",
+          "max": 9449287.0,
+          "min": 127.0,
+          "name": "bids[13].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110457",
+          "max": 0.0111459,
+          "min": 0.0109733,
+          "name": "asks[14].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "27281.0",
+          "max": 9856579.0,
+          "min": 451.0,
+          "name": "asks[14].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110413",
+          "max": 0.0111421,
+          "min": 0.0109684,
+          "name": "bids[14].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "127375.0",
+          "max": 9892726.0,
+          "min": 6.0,
+          "name": "bids[14].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110459",
+          "max": 0.011146,
+          "min": 0.0109734,
+          "name": "asks[15].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "38954.0",
+          "max": 9856579.0,
+          "min": 129.0,
+          "name": "asks[15].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110412",
+          "max": 0.011142,
+          "min": 0.0109682,
+          "name": "bids[15].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "197985.0",
+          "max": 9892726.0,
+          "min": 450.0,
+          "name": "bids[15].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.011046",
+          "max": 0.0111461,
+          "min": 0.0109735,
+          "name": "asks[16].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "156647.0",
+          "max": 10390457.0,
+          "min": 428.0,
+          "name": "asks[16].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110411",
+          "max": 0.0111419,
+          "min": 0.0109681,
+          "name": "bids[16].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "102775.0",
+          "max": 9892726.0,
+          "min": 2.0,
+          "name": "bids[16].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110461",
+          "max": 0.0111462,
+          "min": 0.0109736,
+          "name": "asks[17].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "1040.0",
+          "max": 9825239.0,
+          "min": 451.0,
+          "name": "asks[17].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.011041",
+          "max": 0.0111418,
+          "min": 0.010968,
+          "name": "bids[17].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "99076.0",
+          "max": 9853840.0,
+          "min": 2.0,
+          "name": "bids[17].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110463",
+          "max": 0.0111463,
+          "min": 0.0109737,
+          "name": "asks[18].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "498781.0",
+          "max": 9856579.0,
+          "min": 450.0,
+          "name": "asks[18].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110409",
+          "max": 0.0111417,
+          "min": 0.0109679,
+          "name": "bids[18].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "91285.0",
+          "max": 9853840.0,
+          "min": 2.0,
+          "name": "bids[18].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110464",
+          "max": 0.0111464,
+          "min": 0.0109739,
+          "name": "asks[19].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "168128.0",
+          "max": 9856579.0,
+          "min": 451.0,
+          "name": "asks[19].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110408",
+          "max": 0.0111416,
+          "min": 0.0109678,
+          "name": "bids[19].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "90928.0",
+          "max": 9890492.0,
+          "min": 6.0,
+          "name": "bids[19].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110465",
+          "max": 0.0111465,
+          "min": 0.010974,
+          "name": "asks[20].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "457881.0",
+          "max": 9048652.0,
+          "min": 428.0,
+          "name": "asks[20].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110407",
+          "max": 0.0111415,
+          "min": 0.0109677,
+          "name": "bids[20].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "42480.0",
+          "max": 9892726.0,
+          "min": 450.0,
+          "name": "bids[20].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110466",
+          "max": 0.0111466,
+          "min": 0.0109741,
+          "name": "asks[21].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "798041.0",
+          "max": 9856579.0,
+          "min": 129.0,
+          "name": "asks[21].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110406",
+          "max": 0.0111414,
+          "min": 0.0109676,
+          "name": "bids[21].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "100571.0",
+          "max": 9938633.0,
+          "min": 450.0,
+          "name": "bids[21].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110467",
+          "max": 0.0111467,
+          "min": 0.0109742,
+          "name": "asks[22].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "201864.0",
+          "max": 10344203.0,
+          "min": 195.0,
+          "name": "asks[22].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110405",
+          "max": 0.0111413,
+          "min": 0.0109675,
+          "name": "bids[22].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "147374.0",
+          "max": 9892726.0,
+          "min": 450.0,
+          "name": "bids[22].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110468",
+          "max": 0.0111468,
+          "min": 0.0109743,
+          "name": "asks[23].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "666690.0",
+          "max": 19735863.0,
+          "min": 195.0,
+          "name": "asks[23].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110403",
+          "max": 0.0111412,
+          "min": 0.0109674,
+          "name": "bids[23].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "69663.0",
+          "max": 9892726.0,
+          "min": 450.0,
+          "name": "bids[23].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110469",
+          "max": 0.0111469,
+          "min": 0.0109745,
+          "name": "asks[24].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "1000463.0",
+          "max": 19735863.0,
+          "min": 450.0,
+          "name": "asks[24].amount",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "0.0110402",
+          "max": 0.0111411,
+          "min": 0.0109673,
+          "name": "bids[24].price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "90028.0",
+          "max": 6382063.0,
+          "min": 450.0,
+          "name": "bids[24].amount",
+          "types": [
+            "float"
+          ]
+        }
+      ],
+      "columns": [
+        "row_id",
+        "local_timestamp",
+        "asks[0].price",
+        "asks[0].amount",
+        "bids[0].price",
+        "bids[0].amount",
+        "asks[1].price",
+        "asks[1].amount",
+        "bids[1].price",
+        "bids[1].amount",
+        "asks[2].price",
+        "asks[2].amount",
+        "bids[2].price",
+        "bids[2].amount",
+        "asks[3].price",
+        "asks[3].amount",
+        "bids[3].price",
+        "bids[3].amount",
+        "asks[4].price",
+        "asks[4].amount",
+        "bids[4].price",
+        "bids[4].amount",
+        "asks[5].price",
+        "asks[5].amount",
+        "bids[5].price",
+        "bids[5].amount",
+        "asks[6].price",
+        "asks[6].amount",
+        "bids[6].price",
+        "bids[6].amount",
+        "asks[7].price",
+        "asks[7].amount",
+        "bids[7].price",
+        "bids[7].amount",
+        "asks[8].price",
+        "asks[8].amount",
+        "bids[8].price",
+        "bids[8].amount",
+        "asks[9].price",
+        "asks[9].amount",
+        "bids[9].price",
+        "bids[9].amount",
+        "asks[10].price",
+        "asks[10].amount",
+        "bids[10].price",
+        "bids[10].amount",
+        "asks[11].price",
+        "asks[11].amount",
+        "bids[11].price",
+        "bids[11].amount",
+        "asks[12].price",
+        "asks[12].amount",
+        "bids[12].price",
+        "bids[12].amount",
+        "asks[13].price",
+        "asks[13].amount",
+        "bids[13].price",
+        "bids[13].amount",
+        "asks[14].price",
+        "asks[14].amount",
+        "bids[14].price",
+        "bids[14].amount",
+        "asks[15].price",
+        "asks[15].amount",
+        "bids[15].price",
+        "bids[15].amount",
+        "asks[16].price",
+        "asks[16].amount",
+        "bids[16].price",
+        "bids[16].amount",
+        "asks[17].price",
+        "asks[17].amount",
+        "bids[17].price",
+        "bids[17].amount",
+        "asks[18].price",
+        "asks[18].amount",
+        "bids[18].price",
+        "bids[18].amount",
+        "asks[19].price",
+        "asks[19].amount",
+        "bids[19].price",
+        "bids[19].amount",
+        "asks[20].price",
+        "asks[20].amount",
+        "bids[20].price",
+        "bids[20].amount",
+        "asks[21].price",
+        "asks[21].amount",
+        "bids[21].price",
+        "bids[21].amount",
+        "asks[22].price",
+        "asks[22].amount",
+        "bids[22].price",
+        "bids[22].amount",
+        "asks[23].price",
+        "asks[23].amount",
+        "bids[23].price",
+        "bids[23].amount",
+        "asks[24].price",
+        "asks[24].amount",
+        "bids[24].price",
+        "bids[24].amount"
+      ],
+      "event_type": "book_snapshot_25",
+      "examples": [
+        {
+          "asks[0].amount": "121492.0",
+          "asks[0].price": "0.0110436",
+          "asks[10].amount": "39165.0",
+          "asks[10].price": "0.0110453",
+          "asks[11].amount": "193001.0",
+          "asks[11].price": "0.0110454",
+          "asks[12].amount": "221020.0",
+          "asks[12].price": "0.0110455",
+          "asks[13].amount": "86025.0",
+          "asks[13].price": "0.0110456",
+          "asks[14].amount": "27281.0",
+          "asks[14].price": "0.0110457",
+          "asks[15].amount": "38954.0",
+          "asks[15].price": "0.0110459",
+          "asks[16].amount": "156647.0",
+          "asks[16].price": "0.011046",
+          "asks[17].amount": "1040.0",
+          "asks[17].price": "0.0110461",
+          "asks[18].amount": "498781.0",
+          "asks[18].price": "0.0110463",
+          "asks[19].amount": "168128.0",
+          "asks[19].price": "0.0110464",
+          "asks[1].amount": "4663.0",
+          "asks[1].price": "0.0110438",
+          "asks[20].amount": "457881.0",
+          "asks[20].price": "0.0110465",
+          "asks[21].amount": "798041.0",
+          "asks[21].price": "0.0110466",
+          "asks[22].amount": "201864.0",
+          "asks[22].price": "0.0110467",
+          "asks[23].amount": "666690.0",
+          "asks[23].price": "0.0110468",
+          "asks[24].amount": "1000463.0",
+          "asks[24].price": "0.0110469",
+          "asks[2].amount": "59430.0",
+          "asks[2].price": "0.0110444",
+          "asks[3].amount": "41330.0",
+          "asks[3].price": "0.0110445",
+          "asks[4].amount": "39907.0",
+          "asks[4].price": "0.0110446",
+          "asks[5].amount": "82496.0",
+          "asks[5].price": "0.0110447",
+          "asks[6].amount": "66092.0",
+          "asks[6].price": "0.0110448",
+          "asks[7].amount": "38544.0",
+          "asks[7].price": "0.0110449",
+          "asks[8].amount": "175716.0",
+          "asks[8].price": "0.011045",
+          "asks[9].amount": "85216.0",
+          "asks[9].price": "0.0110452",
+          "bids[0].amount": "103687.0",
+          "bids[0].price": "0.0110435",
+          "bids[10].amount": "102775.0",
+          "bids[10].price": "0.0110418",
+          "bids[11].amount": "37721.0",
+          "bids[11].price": "0.0110417",
+          "bids[12].amount": "20000.0",
+          "bids[12].price": "0.0110415",
+          "bids[13].amount": "155832.0",
+          "bids[13].price": "0.0110414",
+          "bids[14].amount": "127375.0",
+          "bids[14].price": "0.0110413",
+          "bids[15].amount": "197985.0",
+          "bids[15].price": "0.0110412",
+          "bids[16].amount": "102775.0",
+          "bids[16].price": "0.0110411",
+          "bids[17].amount": "99076.0",
+          "bids[17].price": "0.011041",
+          "bids[18].amount": "91285.0",
+          "bids[18].price": "0.0110409",
+          "bids[19].amount": "90928.0",
+          "bids[19].price": "0.0110408",
+          "bids[1].amount": "36226.0",
+          "bids[1].price": "0.0110433",
+          "bids[20].amount": "42480.0",
+          "bids[20].price": "0.0110407",
+          "bids[21].amount": "100571.0",
+          "bids[21].price": "0.0110406",
+          "bids[22].amount": "147374.0",
+          "bids[22].price": "0.0110405",
+          "bids[23].amount": "69663.0",
+          "bids[23].price": "0.0110403",
+          "bids[24].amount": "90028.0",
+          "bids[24].price": "0.0110402",
+          "bids[2].amount": "363479.0",
+          "bids[2].price": "0.0110432",
+          "bids[3].amount": "151775.0",
+          "bids[3].price": "0.0110431",
+          "bids[4].amount": "36226.0",
+          "bids[4].price": "0.0110429",
+          "bids[5].amount": "36226.0",
+          "bids[5].price": "0.0110425",
+          "bids[6].amount": "116549.0",
+          "bids[6].price": "0.0110423",
+          "bids[7].amount": "36226.0",
+          "bids[7].price": "0.0110421",
+          "bids[8].amount": "238607.0",
+          "bids[8].price": "0.011042",
+          "bids[9].amount": "261840.0",
+          "bids[9].price": "0.0110419",
+          "local_timestamp": "1722470402038431",
+          "row_id": "0"
+        },
+        {
+          "asks[0].amount": "121492.0",
+          "asks[0].price": "0.0110436",
+          "asks[10].amount": "39165.0",
+          "asks[10].price": "0.0110453",
+          "asks[11].amount": "193001.0",
+          "asks[11].price": "0.0110454",
+          "asks[12].amount": "221020.0",
+          "asks[12].price": "0.0110455",
+          "asks[13].amount": "86025.0",
+          "asks[13].price": "0.0110456",
+          "asks[14].amount": "27281.0",
+          "asks[14].price": "0.0110457",
+          "asks[15].amount": "38954.0",
+          "asks[15].price": "0.0110459",
+          "asks[16].amount": "156647.0",
+          "asks[16].price": "0.011046",
+          "asks[17].amount": "1040.0",
+          "asks[17].price": "0.0110461",
+          "asks[18].amount": "498781.0",
+          "asks[18].price": "0.0110463",
+          "asks[19].amount": "168128.0",
+          "asks[19].price": "0.0110464",
+          "asks[1].amount": "4663.0",
+          "asks[1].price": "0.0110438",
+          "asks[20].amount": "457881.0",
+          "asks[20].price": "0.0110465",
+          "asks[21].amount": "798041.0",
+          "asks[21].price": "0.0110466",
+          "asks[22].amount": "201864.0",
+          "asks[22].price": "0.0110467",
+          "asks[23].amount": "666690.0",
+          "asks[23].price": "0.0110468",
+          "asks[24].amount": "1000463.0",
+          "asks[24].price": "0.0110469",
+          "asks[2].amount": "59430.0",
+          "asks[2].price": "0.0110444",
+          "asks[3].amount": "41330.0",
+          "asks[3].price": "0.0110445",
+          "asks[4].amount": "39907.0",
+          "asks[4].price": "0.0110446",
+          "asks[5].amount": "82496.0",
+          "asks[5].price": "0.0110447",
+          "asks[6].amount": "66092.0",
+          "asks[6].price": "0.0110448",
+          "asks[7].amount": "38544.0",
+          "asks[7].price": "0.0110449",
+          "asks[8].amount": "175716.0",
+          "asks[8].price": "0.011045",
+          "asks[9].amount": "85216.0",
+          "asks[9].price": "0.0110452",
+          "bids[0].amount": "100499.0",
+          "bids[0].price": "0.0110435",
+          "bids[10].amount": "102775.0",
+          "bids[10].price": "0.0110418",
+          "bids[11].amount": "37721.0",
+          "bids[11].price": "0.0110417",
+          "bids[12].amount": "20000.0",
+          "bids[12].price": "0.0110415",
+          "bids[13].amount": "155832.0",
+          "bids[13].price": "0.0110414",
+          "bids[14].amount": "127375.0",
+          "bids[14].price": "0.0110413",
+          "bids[15].amount": "197985.0",
+          "bids[15].price": "0.0110412",
+          "bids[16].amount": "102775.0",
+          "bids[16].price": "0.0110411",
+          "bids[17].amount": "99076.0",
+          "bids[17].price": "0.011041",
+          "bids[18].amount": "91285.0",
+          "bids[18].price": "0.0110409",
+          "bids[19].amount": "90928.0",
+          "bids[19].price": "0.0110408",
+          "bids[1].amount": "36226.0",
+          "bids[1].price": "0.0110433",
+          "bids[20].amount": "42480.0",
+          "bids[20].price": "0.0110407",
+          "bids[21].amount": "100571.0",
+          "bids[21].price": "0.0110406",
+          "bids[22].amount": "147374.0",
+          "bids[22].price": "0.0110405",
+          "bids[23].amount": "69663.0",
+          "bids[23].price": "0.0110403",
+          "bids[24].amount": "90028.0",
+          "bids[24].price": "0.0110402",
+          "bids[2].amount": "363479.0",
+          "bids[2].price": "0.0110432",
+          "bids[3].amount": "151775.0",
+          "bids[3].price": "0.0110431",
+          "bids[4].amount": "36226.0",
+          "bids[4].price": "0.0110429",
+          "bids[5].amount": "36226.0",
+          "bids[5].price": "0.0110425",
+          "bids[6].amount": "116549.0",
+          "bids[6].price": "0.0110423",
+          "bids[7].amount": "36226.0",
+          "bids[7].price": "0.0110421",
+          "bids[8].amount": "238607.0",
+          "bids[8].price": "0.011042",
+          "bids[9].amount": "261840.0",
+          "bids[9].price": "0.0110419",
+          "local_timestamp": "1722470402305331",
+          "row_id": "1"
+        },
+        {
+          "asks[0].amount": "60925.0",
+          "asks[0].price": "0.0110408",
+          "asks[10].amount": "40821.0",
+          "asks[10].price": "0.011043",
+          "asks[11].amount": "171427.0",
+          "asks[11].price": "0.0110431",
+          "asks[12].amount": "919052.0",
+          "asks[12].price": "0.0110432",
+          "asks[13].amount": "57402.0",
+          "asks[13].price": "0.0110433",
+          "asks[14].amount": "241146.0",
+          "asks[14].price": "0.0110435",
+          "asks[15].amount": "208225.0",
+          "asks[15].price": "0.0110436",
+          "asks[16].amount": "5170.0",
+          "asks[16].price": "0.0110439",
+          "asks[17].amount": "45691.0",
+          "asks[17].price": "0.0110441",
+          "asks[18].amount": "79263.0",
+          "asks[18].price": "0.0110442",
+          "asks[19].amount": "64587.0",
+          "asks[19].price": "0.0110444",
+          "asks[1].amount": "59430.0",
+          "asks[1].price": "0.0110412",
+          "asks[20].amount": "1958.0",
+          "asks[20].price": "0.0110446",
+          "asks[21].amount": "44158.0",
+          "asks[21].price": "0.011045",
+          "asks[22].amount": "44158.0",
+          "asks[22].price": "0.0110452",
+          "asks[23].amount": "173025.0",
+          "asks[23].price": "0.0110453",
+          "asks[24].amount": "162045.0",
+          "asks[24].price": "0.0110454",
+          "asks[2].amount": "59430.0",
+          "asks[2].price": "0.0110416",
+          "asks[3].amount": "121646.0",
+          "asks[3].price": "0.011042",
+          "asks[4].amount": "97023.0",
+          "asks[4].price": "0.0110421",
+          "asks[5].amount": "5157.0",
+          "asks[5].price": "0.0110422",
+          "asks[6].amount": "861413.0",
+          "asks[6].price": "0.0110423",
+          "asks[7].amount": "480845.0",
+          "asks[7].price": "0.0110424",
+          "asks[8].amount": "185572.0",
+          "asks[8].price": "0.0110425",
+          "asks[9].amount": "59430.0",
+          "asks[9].price": "0.0110428",
+          "bids[0].amount": "747323.0",
+          "bids[0].price": "0.0110407",
+          "bids[10].amount": "1495.0",
+          "bids[10].price": "0.0110395",
+          "bids[11].amount": "70083.0",
+          "bids[11].price": "0.0110394",
+          "bids[12].amount": "90777.0",
+          "bids[12].price": "0.0110393",
+          "bids[13].amount": "6180.0",
+          "bids[13].price": "0.0110392",
+          "bids[14].amount": "161577.0",
+          "bids[14].price": "0.011039",
+          "bids[15].amount": "38255.0",
+          "bids[15].price": "0.0110389",
+          "bids[16].amount": "271962.0",
+          "bids[16].price": "0.0110388",
+          "bids[17].amount": "6299.0",
+          "bids[17].price": "0.0110387",
+          "bids[18].amount": "19740.0",
+          "bids[18].price": "0.0110386",
+          "bids[19].amount": "132214.0",
+          "bids[19].price": "0.0110385",
+          "bids[1].amount": "337839.0",
+          "bids[1].price": "0.0110404",
+          "bids[20].amount": "1495.0",
+          "bids[20].price": "0.0110384",
+          "bids[21].amount": "61706.0",
+          "bids[21].price": "0.0110383",
+          "bids[22].amount": "27842.0",
+          "bids[22].price": "0.0110382",
+          "bids[23].amount": "77932.0",
+          "bids[23].price": "0.0110381",
+          "bids[24].amount": "2520.0",
+          "bids[24].price": "0.011038",
+          "bids[2].amount": "403588.0",
+          "bids[2].price": "0.0110403",
+          "bids[3].amount": "247540.0",
+          "bids[3].price": "0.0110402",
+          "bids[4].amount": "51527.0",
+          "bids[4].price": "0.0110401",
+          "bids[5].amount": "97684.0",
+          "bids[5].price": "0.01104",
+          "bids[6].amount": "190398.0",
+          "bids[6].price": "0.0110399",
+          "bids[7].amount": "217072.0",
+          "bids[7].price": "0.0110398",
+          "bids[8].amount": "36226.0",
+          "bids[8].price": "0.0110397",
+          "bids[9].amount": "99076.0",
+          "bids[9].price": "0.0110396",
+          "local_timestamp": "1722470403485121",
+          "row_id": "2"
+        }
+      ],
+      "file": "data/raw/lob.csv",
+      "format": "csv",
+      "max_time_utc": "2024-08-06T23:59:59.947411+00:00",
+      "max_ts": 1722988799947411,
+      "min_time_utc": "2024-08-01T00:00:02.038431+00:00",
+      "min_ts": 1722470402038431,
+      "monotonic_violations": 0,
+      "price_max": null,
+      "price_min": null,
+      "rows": 1036690,
+      "side_counts": {},
+      "size_bytes": 969925308,
+      "timestamp_unit": "microseconds"
+    },
+    {
+      "amount_max": 179090276.0,
+      "amount_min": 1.0,
+      "column_profiles": [
+        {
+          "example": "0",
+          "max": 9999.0,
+          "min": 0.0,
+          "name": "row_id",
+          "types": [
+            "int"
+          ]
+        },
+        {
+          "example": "1722470400014926",
+          "max": 1722470805591003.0,
+          "min": 1722470400014926.0,
+          "name": "local_timestamp",
+          "types": [
+            "int"
+          ]
+        },
+        {
+          "example": "sell",
+          "max": null,
+          "min": null,
+          "name": "side",
+          "types": [
+            "string"
+          ]
+        },
+        {
+          "example": "0.0110435",
+          "max": 0.01111,
+          "min": 0.0110191,
+          "name": "price",
+          "types": [
+            "float"
+          ]
+        },
+        {
+          "example": "734",
+          "max": 3655685.0,
+          "min": 1.0,
+          "name": "amount",
+          "types": [
+            "int"
+          ]
+        }
+      ],
+      "columns": [
+        "row_id",
+        "local_timestamp",
+        "side",
+        "price",
+        "amount"
+      ],
+      "event_type": "trade",
+      "examples": [
+        {
+          "amount": "734",
+          "local_timestamp": "1722470400014926",
+          "price": "0.0110435",
+          "row_id": "0",
+          "side": "sell"
+        },
+        {
+          "amount": "1633",
+          "local_timestamp": "1722470402982045",
+          "price": "0.0110435",
+          "row_id": "1",
+          "side": "sell"
+        },
+        {
+          "amount": "25445",
+          "local_timestamp": "1722470402982047",
+          "price": "0.0110435",
+          "row_id": "2",
+          "side": "sell"
+        }
+      ],
+      "file": "data/raw/trades.csv",
+      "format": "csv",
+      "max_time_utc": "2024-08-06T23:59:59.849954+00:00",
+      "max_ts": 1722988799849954,
+      "min_time_utc": "2024-08-01T00:00:00.014926+00:00",
+      "min_ts": 1722470400014926,
+      "monotonic_violations": 0,
+      "price_max": 0.0111441,
+      "price_min": 0.0058452,
+      "rows": 21864989,
+      "side_counts": {
+        "buy": 10959360,
+        "sell": 10905629
+      },
+      "size_bytes": 991873579,
+      "timestamp_unit": "microseconds"
+    }
+  ],
+  "sample": {
+    "files": {
+      "lob.csv": {
+        "rows": 7200,
+        "size_bytes": 6717479
+      },
+      "trades.csv": {
+        "rows": 750467,
+        "size_bytes": 34578559
+      }
+    },
+    "sample_duration_seconds": 3600,
+    "sample_end_utc": "2024-08-05T07:00:00+00:00",
+    "sample_start_utc": "2024-08-05T06:00:00+00:00"
+  },
+  "sample_window_utc": {
+    "end": "2024-08-05T07:00:00+00:00",
+    "start": "2024-08-05T06:00:00+00:00"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "files": {
+    "lob.csv": {
+      "rows": 7200,
+      "size_bytes": 6717479
+    },
+    "trades.csv": {
+      "rows": 750467,
+      "size_bytes": 34578559
+    }
+  },
+  "sample_duration_seconds": 3600,
+  "sample_end_utc": "2024-08-05T07:00:00+00:00",
+  "sample_start_utc": "2024-08-05T06:00:00+00:00"
+}

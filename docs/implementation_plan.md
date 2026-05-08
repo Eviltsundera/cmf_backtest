@@ -97,7 +97,7 @@ script scaffold. DoD проверен через временный toolchain в
 
 **Подзадачи:**
 - Распаковать `cmf/data/MD.zip` в `cmf/data/raw/`.
-- `scripts/python/audit.py` — читает первые N строк/файлов, печатает:
+- `lob_backtester/scripts/python/audit.py` — читает первые N строк/файлов, печатает:
   - имена файлов, форматы (CSV/parquet/jsonl), размеры;
   - имена колонок, типы, диапазон значений;
   - единицы timestamp (ns/us/ms/s), наличие `sequence`, наличие `side` для trades;
@@ -108,10 +108,18 @@ script scaffold. DoD проверен через временный toolchain в
 - Решить: парсим CSV/JSONL напрямую в C++ или конвертируем в бинарный формат (Apache Arrow IPC / простой packed binary) на стадии preprocessing для скорости replay.
 
 **DoD:**
-- [ ] `cmf/docs/data_audit.md` содержит таблицу колонок и пример записи каждого типа события.
-- [ ] `cmf/data/sample/` существует и содержит файл(ы) <50MB с покрытием все типов событий.
-- [ ] `scripts/python/audit.py` идемпотентен и запускается одной командой.
-- [ ] Принято и задокументировано решение по preprocessing (raw → in-engine binary либо raw напрямую).
+- [x] `cmf/docs/data_audit.md` содержит таблицу колонок и пример записи каждого типа события.
+- [x] `cmf/data/sample/` существует и содержит файл(ы) <50MB с покрытием все типов событий.
+- [x] `lob_backtester/scripts/python/audit.py` идемпотентен и запускается одной командой.
+- [x] Принято и задокументировано решение по preprocessing (raw → in-engine binary либо raw напрямую).
+
+**Статус:** done 2026-05-08.
+
+Итог: `MD.zip` содержит CSV-only данные: `lob.csv` как 25-level book snapshots и
+`trades.csv` как trade stream. Native `depth_update` отсутствует. Sample выбран
+по самому активному часу `2024-08-05 06:00:00..07:00:00 UTC`; файлы sample
+меньше 50MB. Решение по preprocessing: в MVP парсим CSV напрямую в C++ и
+возвращаемся к binary format только если replay benchmark покажет bottleneck.
 
 ---
 
@@ -581,7 +589,7 @@ script scaffold. DoD проверен через временный toolchain в
 
 ## Точки принятия решений (открытые вопросы)
 
-1. **Формат данных после T1.** Если в `MD.zip` parquet — добавить Apache Arrow в зависимости. Если CSV — свой парсер достаточно.
-2. **Preprocessing в бинарь.** Если CSV-парсинг становится bottleneck'ом, на T2 сделать однократную конвертацию raw → packed binary IPC.
-3. **Walk-forward.** Зависит от объёма данных в T1. Если < 1 дня данных, ограничиться сетка-сравнением без train/val/test split.
+1. **Формат данных после T1.** Решено: `MD.zip` содержит CSV-only `lob.csv` и `trades.csv`; для MVP используем свой streaming CSV parser.
+2. **Preprocessing в бинарь.** Решено отложить: binary preprocessing добавлять только если T3 replay benchmark покажет bottleneck CSV-парсинга.
+3. **Walk-forward.** Данные покрывают 2024-08-01..2024-08-06 UTC; train/validation/test split возможен, конкретные границы выбрать в T14.
 4. **Bin-based microprice.** В MVP — proxy формулой. Bin-based — в roadmap.

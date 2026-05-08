@@ -82,7 +82,8 @@ market data.
 
 Целевая ответственность:
 
-- исследовать CSV/Parquet/JSONL schemas на T1;
+- использовать схему из `docs/data_audit.md`: CSV-only `book_snapshot_25` +
+  `trade`, timestamp в microseconds;
 - нормализовать timestamps в наносекунды;
 - нормализовать prices и quantities к `tick_size` и `lot_size`;
 - валидировать монотонность timestamp и дубликаты;
@@ -290,8 +291,9 @@ artifacts/runs/<run_name>/
   inventory.csv
 ```
 
-T1 должен создать `docs/data_audit.md` со схемой данных, единицей timestamp,
-типами колонок, sample interval и решением по preprocessing.
+`docs/data_audit.md` фиксирует схему данных, единицу timestamp, типы колонок,
+sample interval и решение по preprocessing. MVP читает CSV напрямую; binary
+preprocessing откладывается до replay benchmark.
 
 ## 9. Стратегия тестирования
 
@@ -316,11 +318,11 @@ data используется для integration и throughput checks после
 
 Ближайшие задачи:
 
-1. T1: audit `MD.zip`, document schema и создать small sample dataset.
-2. T2: реализовать normalized market-event loading.
-3. T3: реализовать Market-By-Price order book.
-4. T4: реализовать order-book features и rolling volatility.
-5. T5-T8: добавить OMS, fills, portfolio, metrics и event loop.
+1. T2: реализовать normalized market-event loading.
+2. T3: реализовать Market-By-Price order book.
+3. T4: реализовать order-book features и rolling volatility.
+4. T5-T8: добавить OMS, fills, portfolio, metrics и event loop.
+5. T9-T14: стратегии, конфиги, dashboard и финальные эксперименты.
 
 Финальные deliverables:
 

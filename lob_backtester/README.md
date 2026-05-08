@@ -54,3 +54,9 @@ python3.11 -m venv lob_backtester/scripts/python/.venv
 source lob_backtester/scripts/python/.venv/bin/activate
 pip install -r lob_backtester/scripts/python/requirements.txt
 ```
+
+Run the raw data audit and regenerate the deterministic one-hour sample:
+
+```bash
+python3 lob_backtester/scripts/python/audit.py --json-out data/sample/audit_summary.json
+```
