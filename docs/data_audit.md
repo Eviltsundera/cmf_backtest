@@ -52,7 +52,7 @@ Common fields:
 
 | Column | Type | Range / values | Notes |
 | --- | --- | --- | --- |
-| `side` | string | `buy`, `sell` | Trade side from the data source. Treat as aggressor side only after confirming the venue convention; fill model can use `price` without side. |
+| `side` | string | `buy`, `sell` | Aggressor side from the trade stream. `buy` trades can hit resting sells; `sell` trades can hit resting buys. |
 | `price` | decimal | `0.0058452..0.0111441` | Trade price. |
 | `amount` | int64 | `1..179090276` | Trade amount. |
 

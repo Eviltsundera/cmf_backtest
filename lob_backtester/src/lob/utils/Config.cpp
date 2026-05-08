@@ -194,6 +194,8 @@ void apply_override(AppConfig &config, const ConfigOverride &override) {
     config.market.lot_size = parse_double_override(key, value);
   } else if (key == "book.max_depth" || key == "data.max_depth") {
     config.book.max_depth = parse_uint32_override(key, value);
+  } else if (key == "book.crossed_book_policy") {
+    config.book.crossed_book_policy = parse_string_override(key, value);
   } else if (key == "portfolio.initial_cash") {
     config.portfolio.initial_cash = parse_double_override(key, value);
   } else if (key == "portfolio.max_inventory") {
@@ -273,6 +275,8 @@ AppConfig load_config(const std::filesystem::path &path) {
 
   config.book.max_depth =
       required_value_any<std::uint32_t>(book, "max_depth", data, "max_depth", "book.max_depth");
+  config.book.crossed_book_policy =
+      optional_value<std::string>(book, "crossed_book_policy", "drop_crossing_levels");
 
   config.portfolio.initial_cash = optional_value<double>(portfolio, "initial_cash", 0.0);
 
@@ -331,6 +335,7 @@ std::string describe_config(const AppConfig &config) {
   out << "tick_size=" << config.market.tick_size << '\n';
   out << "lot_size=" << config.market.lot_size << '\n';
   out << "max_depth=" << config.book.max_depth << '\n';
+  out << "crossed_book_policy=" << config.book.crossed_book_policy << '\n';
   out << "initial_cash=" << config.portfolio.initial_cash << '\n';
   out << "fill_model=" << config.execution.fill_model << '\n';
   out << "fill_reference=" << config.execution.fill_reference << '\n';

@@ -16,6 +16,7 @@ TEST(ConfigSmokeTest, LoadsExampleConfig) {
   EXPECT_FALSE(config.execution.partial_fills);
   EXPECT_GT(config.market.tick_size, 0.0);
   EXPECT_GT(config.book.max_depth, 0U);
+  EXPECT_EQ(config.book.crossed_book_policy, "drop_crossing_levels");
   EXPECT_DOUBLE_EQ(config.portfolio.initial_cash, 0.0);
 }
 
@@ -74,7 +75,8 @@ TEST(ConfigSmokeTest, AppliesOverridesToEffectiveConfig) {
                {"run.output_dir", "lob_backtester/artifacts/runs/override"},
                {"execution.partial_fills", "true"},
                {"portfolio.initial_cash", "100000.5"},
-               {"fees.maker_bps", "-1.25"}});
+               {"fees.maker_bps", "-1.25"},
+               {"book.crossed_book_policy", "reject"}});
 
   EXPECT_DOUBLE_EQ(overridden.strategy.gamma, 0.05);
   EXPECT_EQ(overridden.run.output_dir,
@@ -82,6 +84,7 @@ TEST(ConfigSmokeTest, AppliesOverridesToEffectiveConfig) {
   EXPECT_TRUE(overridden.execution.partial_fills);
   EXPECT_DOUBLE_EQ(overridden.portfolio.initial_cash, 100000.5);
   EXPECT_DOUBLE_EQ(overridden.execution.maker_bps, -1.25);
+  EXPECT_EQ(overridden.book.crossed_book_policy, "reject");
   EXPECT_NE(lob::utils::config_hash(config), lob::utils::config_hash(overridden));
 }
 

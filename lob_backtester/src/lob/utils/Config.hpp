@@ -21,6 +21,7 @@ struct MarketConfig {
 
 struct BookConfig {
   std::uint32_t max_depth = 0;
+  std::string crossed_book_policy = "drop_crossing_levels";
 };
 
 struct PortfolioConfig {

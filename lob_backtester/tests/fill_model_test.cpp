@@ -51,7 +51,8 @@ TEST(FillModelTest, BuyLimitFillsWhenTradePriceIsAtOrBelowLimit) {
   const auto &order = orders.submit_limit(1, lob::execution::OrderSide::Buy, 100, 2, 1000);
   const lob::execution::FillModel model(trade_price_config());
 
-  const auto fill = model.check_fill(order, trade_event(1100, 99), make_book());
+  const auto fill =
+      model.check_fill(order, trade_event(1100, 99, lob::data::TradeSide::Sell), make_book());
 
   ASSERT_TRUE(fill.has_value());
   EXPECT_EQ(fill->order_id, order.id);
@@ -65,7 +66,19 @@ TEST(FillModelTest, BuyLimitDoesNotFillWhenTradePriceIsAboveLimit) {
   const auto &order = orders.submit_limit(1, lob::execution::OrderSide::Buy, 100, 2, 1000);
   const lob::execution::FillModel model(trade_price_config());
 
-  EXPECT_FALSE(model.check_fill(order, trade_event(1100, 101), make_book()).has_value());
+  EXPECT_FALSE(
+      model.check_fill(order, trade_event(1100, 101, lob::data::TradeSide::Sell), make_book())
+          .has_value());
+}
+
+TEST(FillModelTest, BuyLimitIgnoresBuyAggressorTrade) {
+  lob::execution::OrderManager orders;
+  const auto &order = orders.submit_limit(1, lob::execution::OrderSide::Buy, 100, 2, 1000);
+  const lob::execution::FillModel model(trade_price_config());
+
+  EXPECT_FALSE(
+      model.check_fill(order, trade_event(1100, 99, lob::data::TradeSide::Buy), make_book())
+          .has_value());
 }
 
 TEST(FillModelTest, SellLimitFillsWhenTradePriceIsAtOrAboveLimit) {
@@ -87,6 +100,16 @@ TEST(FillModelTest, SellLimitDoesNotFillWhenTradePriceIsBelowLimit) {
   const lob::execution::FillModel model(trade_price_config());
 
   EXPECT_FALSE(model.check_fill(order, trade_event(1100, 99), make_book()).has_value());
+}
+
+TEST(FillModelTest, SellLimitIgnoresSellAggressorTrade) {
+  lob::execution::OrderManager orders;
+  const auto &order = orders.submit_limit(1, lob::execution::OrderSide::Sell, 100, 2, 1000);
+  const lob::execution::FillModel model(trade_price_config());
+
+  EXPECT_FALSE(
+      model.check_fill(order, trade_event(1100, 101, lob::data::TradeSide::Sell), make_book())
+          .has_value());
 }
 
 TEST(FillModelTest, FallsBackToBestQuoteWhenEventHasNoTradePrice) {
@@ -131,8 +154,8 @@ TEST(FillModelTest, AllowsMakerRebatesAsNegativeFees) {
 
   auto config = trade_price_config();
   config.maker_bps = -2.5;
-  const auto fill =
-      lob::execution::FillModel(config).check_fill(buy, trade_event(1100, 99), make_book());
+  const auto fill = lob::execution::FillModel(config).check_fill(
+      buy, trade_event(1100, 99, lob::data::TradeSide::Sell), make_book());
 
   ASSERT_TRUE(fill.has_value());
   EXPECT_EQ(fill->liquidity_role, lob::execution::LiquidityRole::Maker);
@@ -149,12 +172,14 @@ TEST(FillModelIntegrationTest, ActiveOrdersFillOnTradesAndRoundTripPnlIsExactWit
   const auto book = make_book();
   std::vector<lob::execution::Fill> fills;
 
-  auto first_fills = model.fill_active_orders(orders, trade_event(1100, 99), book);
+  auto first_fills =
+      model.fill_active_orders(orders, trade_event(1100, 99, lob::data::TradeSide::Sell), book);
   fills.insert(fills.end(), first_fills.begin(), first_fills.end());
   EXPECT_EQ(orders.find_order(buy.id)->status, lob::execution::OrderStatus::Filled);
   EXPECT_EQ(orders.find_order(sell.id)->status, lob::execution::OrderStatus::Active);
 
-  auto second_fills = model.fill_active_orders(orders, trade_event(1200, 101), book);
+  auto second_fills =
+      model.fill_active_orders(orders, trade_event(1200, 101, lob::data::TradeSide::Buy), book);
   fills.insert(fills.end(), second_fills.begin(), second_fills.end());
   EXPECT_EQ(orders.find_order(sell.id)->status, lob::execution::OrderStatus::Filled);
   EXPECT_EQ(orders.active_count(), 0U);

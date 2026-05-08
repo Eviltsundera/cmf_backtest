@@ -72,8 +72,8 @@ The latest committed report also stores the two final-PnL heatmaps in
 
 | Strategy | Net PnL | Max DD | Turnover qty | Fill rate | Adv 1s | Adv 10s |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Fixed spread | -741593 | 742064 | 31618 | 0.598724 | -24.153 | -23.945 |
-| A-S | -4345 | 48629.5 | 30 | 0.001700 | -7.117 | -39.063 |
-| Microprice A-S | -4345 | 48633.5 | 28 | 0.001559 | -4.321 | -25.750 |
+| Fixed spread | -759847 | 760318 | 29016 | 0.552349 | -27.261 | -26.572 |
+| A-S | -4346 | 48629.5 | 30 | 0.001700 | -7.150 | -38.854 |
+| Microprice A-S | -4362 | 48633.5 | 24 | 0.001376 | -11.688 | -34.792 |
 
-Best grid run: `gamma=0.02`, `k=1.0`, `beta=1.0`, net PnL `77`.
+Best grid run: `gamma=0.02`, `k=1.0`, `beta=1.0`, net PnL `45`.

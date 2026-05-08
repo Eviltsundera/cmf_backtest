@@ -10,21 +10,21 @@
 <text x="244" y="394" text-anchor="middle" font-family="Arial, sans-serif" font-size="13">gamma</text>
 <text x="22" y="196" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" transform="rotate(-90 22 196)">beta</text>
 <rect x="112" y="64" width="88" height="88" fill="#eff6ff" stroke="#ffffff" stroke-width="2"/>
-<text x="156" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0f172a">-13796.8333333</text>
-<rect x="200" y="64" width="88" height="88" fill="#5f78c8" stroke="#ffffff" stroke-width="2"/>
-<text x="244" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-4331.66666667</text>
+<text x="156" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0f172a">-16911</text>
+<rect x="200" y="64" width="88" height="88" fill="#536ec3" stroke="#ffffff" stroke-width="2"/>
+<text x="244" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-4332.66666667</text>
 <rect x="288" y="64" width="88" height="88" fill="#1e40af" stroke="#ffffff" stroke-width="2"/>
-<text x="332" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-88.6666666667</text>
-<rect x="112" y="152" width="88" height="88" fill="#9aacde" stroke="#ffffff" stroke-width="2"/>
-<text x="156" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0f172a">-8220.83333333</text>
-<rect x="200" y="152" width="88" height="88" fill="#5f79c8" stroke="#ffffff" stroke-width="2"/>
-<text x="244" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-4342.33333333</text>
+<text x="332" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-100.333333333</text>
+<rect x="112" y="152" width="88" height="88" fill="#4e6ac1" stroke="#ffffff" stroke-width="2"/>
+<text x="156" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-3947.66666667</text>
+<rect x="200" y="152" width="88" height="88" fill="#536ec3" stroke="#ffffff" stroke-width="2"/>
+<text x="244" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-4354.66666667</text>
 <rect x="288" y="152" width="88" height="88" fill="#1e40af" stroke="#ffffff" stroke-width="2"/>
-<text x="332" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-78.6666666667</text>
-<rect x="112" y="240" width="88" height="88" fill="#a2b3e1" stroke="#ffffff" stroke-width="2"/>
-<text x="156" y="288" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0f172a">-8728</text>
-<rect x="200" y="240" width="88" height="88" fill="#5f79c8" stroke="#ffffff" stroke-width="2"/>
-<text x="244" y="288" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-4337.33333333</text>
+<text x="332" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-108.333333333</text>
+<rect x="112" y="240" width="88" height="88" fill="#536ec3" stroke="#ffffff" stroke-width="2"/>
+<text x="156" y="288" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-4359.66666667</text>
+<rect x="200" y="240" width="88" height="88" fill="#536ec3" stroke="#ffffff" stroke-width="2"/>
+<text x="244" y="288" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-4355.33333333</text>
 <rect x="288" y="240" width="88" height="88" fill="#1e40af" stroke="#ffffff" stroke-width="2"/>
-<text x="332" y="288" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-86.3333333333</text>
+<text x="332" y="288" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">-107</text>
 </svg>

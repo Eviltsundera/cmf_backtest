@@ -123,14 +123,17 @@ and filled lifecycle events.
 
 The MVP fill model is price-cross execution:
 
-- a buy limit fills when the selected fill reference is at or below the limit;
-- a sell limit fills when the selected fill reference is at or above the limit;
+- a buy limit fills on a `sell` aggressor trade when the selected fill
+  reference is at or below the limit;
+- a sell limit fills on a `buy` aggressor trade when the selected fill
+  reference is at or above the limit;
 - fill price is the owned order's limit price;
 - partial fills are disabled by default.
 
 Supported fill references:
 
-- `trade_price`;
+- `trade_price`, with opposite-aggressor-side filtering on trade events and
+  best-quote fallback on non-trade events;
 - `best_quote`;
 - `mid_price`.
 
@@ -198,6 +201,7 @@ market:
 
 book:
   max_depth: 50
+  crossed_book_policy: drop_crossing_levels
 
 portfolio:
   initial_cash: 0.0

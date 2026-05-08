@@ -10,6 +10,7 @@ market:
 
 book:
   max_depth: 50
+  crossed_book_policy: drop_crossing_levels
 
 portfolio:
   initial_cash: 0.0

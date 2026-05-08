@@ -21,3 +21,5 @@ data/sample_reports/_static/
 data/raw/
 *.zip
 *.log
+
+tmp/

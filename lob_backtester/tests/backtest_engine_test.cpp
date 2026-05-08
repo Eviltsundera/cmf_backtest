@@ -372,6 +372,25 @@ TEST(BacktestEngineTest, StrategySeesOnlyCurrentAppliedMarketState) {
   EXPECT_DOUBLE_EQ(strategy.mids[1], 104.0);
 }
 
+TEST(BacktestEngineTest, NoopStrategySubmitsNoOrders) {
+  VectorDataSource source({
+      snapshot_event(1'000, 1, 99, 10, 101, 10),
+      trade_event(2'000, 2, lob::data::TradeSide::Sell, 99),
+      trade_event(3'000, 3, lob::data::TradeSide::Buy, 101),
+  });
+  lob::strategies::NoopStrategy strategy;
+
+  auto config = default_engine_config();
+  config.quote_refresh_ns = 0;
+  const lob::engine::BacktestResult result =
+      lob::engine::BacktestEngine(config).run(source, strategy);
+
+  EXPECT_EQ(result.order_event_count, 0U);
+  EXPECT_EQ(result.fill_count, 0U);
+  EXPECT_EQ(result.active_order_count, 0U);
+  EXPECT_DOUBLE_EQ(result.metrics.fill_rate, 0.0);
+}
+
 TEST(BacktestEngineIntegrationTest, ReplaysSampleAndReportsThroughput) {
   const auto data_dir = std::filesystem::path(LOB_TEST_DATA_DIR);
   ASSERT_TRUE(std::filesystem::exists(data_dir / "lob.csv"));

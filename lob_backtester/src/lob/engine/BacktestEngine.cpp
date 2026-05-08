@@ -14,8 +14,6 @@
 namespace lob::engine {
 namespace {
 
-constexpr double kMicropriceAlpha = 0.5;
-
 struct ActiveQuotes {
   std::optional<double> bid;
   std::optional<double> ask;
@@ -235,7 +233,6 @@ strategies::MarketState make_market_state(const data::MarketEvent &event,
   state.spread_ticks = book.spread();
   state.imbalance = features::imbalance(book);
   state.weighted_mid = features::weighted_mid(book);
-  state.microprice_proxy = features::microprice_proxy(book, kMicropriceAlpha);
   state.inventory_lots = portfolio.position_lots();
   state.cash = portfolio.cash();
   state.active_order_count = orders.active_count();

@@ -20,8 +20,8 @@ Implemented:
   microprice proxy, and rolling mid-return volatility.
 - OrderManager lifecycle for limit order submit/cancel/replace/fill, risk gates,
   and `orders.csv` logging.
-- FillModel for trade-price, best-quote, and mid-price execution checks with
-  maker/taker fee accounting.
+- FillModel for aggressor-side-aware trade-price, best-quote, and mid-price
+  execution checks with maker/taker fee accounting.
 - Portfolio accounting for cash, signed inventory, realized/unrealized PnL, and
   mark-to-market equity.
 - MetricsEngine for PnL, inventory, turnover, fill-rate, drawdown,
@@ -86,19 +86,19 @@ Dataset: `data/sample`, `2024-08-05T06:00:00Z` to
 
 | Strategy | Net PnL | Max DD | Mean inv | Max inv | Turnover qty | Fill rate | Spread captured | Adv 1s | Adv 10s |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Fixed spread | -741593 | 742064 | 0.601 | 10 | 31618 | 0.598724 | 1.001 | -24.153 | -23.945 |
-| A-S | -4345 | 48629.5 | 6.078 | 10 | 30 | 0.001700 | 9.617 | -7.117 | -39.063 |
-| Microprice A-S | -4345 | 48633.5 | 6.071 | 10 | 28 | 0.001559 | 8.304 | -4.321 | -25.750 |
+| Fixed spread | -759847 | 760318 | 0.680 | 10 | 29016 | 0.552349 | 0.014 | -27.261 | -26.572 |
+| A-S | -4346 | 48629.5 | 6.078 | 10 | 30 | 0.001700 | 4.850 | -7.150 | -38.854 |
+| Microprice A-S | -4362 | 48633.5 | 6.083 | 10 | 24 | 0.001376 | 3.292 | -11.688 | -34.792 |
 
 Sensitivity grid:
 
 | Segment | Result |
 | --- | --- |
 | Grid | `gamma in {0.005, 0.01, 0.02}`, `k in {0.5, 1.0, 2.0}`, `beta in {0.0, 0.5, 1.0}` |
-| Best run | `gamma=0.02`, `k=1.0`, `beta=1.0`, net PnL `77` |
-| Mean PnL, `beta=0.0` | `-6072.389` |
-| Mean PnL, `beta=0.5` | `-4213.944` |
-| Mean PnL, `beta=1.0` | `-4383.889` |
+| Best run | `gamma=0.02`, `k=1.0`, `beta=1.0`, net PnL `45` |
+| Mean PnL, `beta=0.0` | `-7114.667` |
+| Mean PnL, `beta=0.5` | `-2803.556` |
+| Mean PnL, `beta=1.0` | `-2940.667` |
 
 ![Strategy comparison dashboard](docs/assets/main_compare.png)
 
@@ -110,11 +110,12 @@ Conclusions:
   fills but accumulates severe drawdown and adverse selection.
 - Classic A-S strongly reduces turnover and drawdown by widening quotes and
   skewing for inventory, at the cost of a low fill rate.
-- Microprice A-S matches classic A-S net PnL on the base config and improves
-  1s/10s markout; in the grid, `beta > 0` is better on average than `beta=0`.
+- Microprice A-S is slightly worse than classic A-S on the base config, but it
+  keeps lower turnover and has better 10s markout; in the grid, `beta > 0`
+  remains better on average than `beta=0`.
 - `beta=0.5` has the best average grid PnL, while the single best run uses
   `beta=1.0`; that suggests full microprice skew can work, but a softer signal
-  weight is more stable.
+  weight is more stable across the grid.
 
 ## Roadmap
 
@@ -234,8 +235,6 @@ For tracked sample report fixtures that work on a clean checkout, use:
 streamlit run scripts/python/dashboard.py -- --reports-dir data/sample_reports
 ```
 
-![Dashboard overview](docs/assets/dashboard_overview.svg)
-
 Export a static submission report without Streamlit:
 
 ```bash
@@ -288,6 +287,9 @@ python3 lob_backtester/scripts/python/audit.py --json-out data/sample/audit_summ
 ## Documentation
 
 - [Implementation plan](docs/implementation_plan.md)
+- [Architecture](docs/architecture.md)
+- [Execution model](docs/execution_model.md)
+- [Strategy models](docs/strategy_models.md)
 - [Technical documentation](docs/technical_documentation.md)
 - [Final report](docs/report.md)
 - [Experiments runbook](docs/experiments.md)

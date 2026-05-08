@@ -43,10 +43,14 @@ lob::strategies::MarketState market_state(const double mid_price,
   state.spread_ticks = best_ask - best_bid;
   state.imbalance = static_cast<double>(bid_quantity - ask_quantity) /
                     static_cast<double>(bid_quantity + ask_quantity);
-  state.microprice_proxy =
-      mid_price + (static_cast<double>(*state.spread_ticks) / 2.0) * *state.imbalance;
   state.inventory_lots = inventory_lots;
   return state;
+}
+
+double microprice_proxy_from_state(const lob::strategies::MarketState &state,
+                                   const double alpha = 1.0) {
+  return *state.mid_price +
+         (alpha * (static_cast<double>(*state.spread_ticks) / 2.0) * *state.imbalance);
 }
 
 void expect_intents_equal(const std::vector<lob::execution::OrderIntent> &left,
@@ -108,7 +112,7 @@ TEST(MicropriceAvellanedaStoikovFormulaTest, BidHeavyImbalanceRaisesReservationP
   const auto classic =
       lob::strategies::compute_avellaneda_stoikov_quote(100.0, 0, 0.1, 1.0, 1.0, 10.0, 1);
   const double fair_price = lob::strategies::compute_microprice_adjusted_fair_price(
-      *state.mid_price, *state.microprice_proxy, 1.0);
+      *state.mid_price, microprice_proxy_from_state(state), 1.0);
   const auto microprice =
       lob::strategies::compute_avellaneda_stoikov_quote(fair_price, 0, 0.1, 1.0, 1.0, 10.0, 1);
 
@@ -120,7 +124,7 @@ TEST(MicropriceAvellanedaStoikovFormulaTest, AskHeavyImbalanceLowersReservationP
   const auto classic =
       lob::strategies::compute_avellaneda_stoikov_quote(100.0, 0, 0.1, 1.0, 1.0, 10.0, 1);
   const double fair_price = lob::strategies::compute_microprice_adjusted_fair_price(
-      *state.mid_price, *state.microprice_proxy, 1.0);
+      *state.mid_price, microprice_proxy_from_state(state), 1.0);
   const auto microprice =
       lob::strategies::compute_avellaneda_stoikov_quote(fair_price, 0, 0.1, 1.0, 1.0, 10.0, 1);
 

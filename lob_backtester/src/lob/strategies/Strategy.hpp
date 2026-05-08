@@ -22,7 +22,6 @@ struct MarketState {
   std::optional<book::Price> spread_ticks;
   std::optional<double> imbalance;
   std::optional<double> weighted_mid;
-  std::optional<double> microprice_proxy;
   execution::Quantity inventory_lots = 0;
   double cash = 0.0;
   std::size_t active_order_count = 0;

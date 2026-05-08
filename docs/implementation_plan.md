@@ -286,10 +286,10 @@ instructions, and Python dependencies are documented.
 
 **Result summary:**
 
-- fixed spread: PnL `-741593`;
-- A-S: PnL `-4345`;
-- microprice A-S: PnL `-4345`;
-- best grid run: `gamma=0.02`, `k=1.0`, `beta=1.0`, PnL `77`.
+- fixed spread: PnL `-759847`;
+- A-S: PnL `-4346`;
+- microprice A-S: PnL `-4362`;
+- best grid run: `gamma=0.02`, `k=1.0`, `beta=1.0`, PnL `45`.
 
 **DoD:** base artifacts, grid artifacts, report sections, sensitivity heatmaps,
 and README reproduction commands are complete.

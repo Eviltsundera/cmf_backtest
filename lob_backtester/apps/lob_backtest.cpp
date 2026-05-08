@@ -266,6 +266,19 @@ lob::execution::FillReference parse_fill_reference(const std::string_view value)
   throw std::runtime_error("Unsupported fill_reference: " + std::string(value));
 }
 
+lob::book::CrossedBookPolicy parse_crossed_book_policy(const std::string_view value) {
+  if (value == "drop_crossing_levels" || value == "drop_crossing" || value == "drop") {
+    return lob::book::CrossedBookPolicy::DropCrossingLevels;
+  }
+  if (value == "reject") {
+    return lob::book::CrossedBookPolicy::Reject;
+  }
+  if (value == "ignore_with_warning" || value == "warn" || value == "ignore") {
+    return lob::book::CrossedBookPolicy::IgnoreWithWarning;
+  }
+  throw std::runtime_error("Unsupported crossed_book_policy: " + std::string(value));
+}
+
 bool is_fixed_spread_strategy(const std::string_view name) {
   return name == "fixed_spread" || name == "baseline_fixed" || name == "fixed";
 }
@@ -309,6 +322,8 @@ engine_config_from_app_config(const lob::utils::AppConfig &config) {
 
   lob::engine::BacktestEngineConfig engine_config;
   engine_config.book.max_depth = config.book.max_depth;
+  engine_config.book.crossed_book_policy =
+      parse_crossed_book_policy(config.book.crossed_book_policy);
   engine_config.initial_cash = config.portfolio.initial_cash;
   engine_config.fills.fill_reference = parse_fill_reference(config.execution.fill_reference);
   engine_config.fills.partial_fills = config.execution.partial_fills;

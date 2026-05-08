@@ -101,6 +101,9 @@ python3 scripts/python/run_experiments.py --input-path data/raw/MD
 ## Documentation
 
 - [Implementation plan](../docs/implementation_plan.md)
+- [Architecture](../docs/architecture.md)
+- [Execution model](../docs/execution_model.md)
+- [Strategy models](../docs/strategy_models.md)
 - [Technical documentation](../docs/technical_documentation.md)
 - [Experiments runbook](../docs/experiments.md)
 - [Final report](../docs/report.md)
@@ -116,12 +119,13 @@ clang-tidy -p build lob_backtester/apps/lob_backtest.cpp lob_backtester/src/lob/
 ## Python Utilities
 
 Python scripts for data audit, plotting, and report generation live under
-`lob_backtester/scripts/python`.
+`lob_backtester/scripts/python`. Use the repository-root Python dependency file
+for all Python utilities.
 
 ```bash
 python3.11 -m venv lob_backtester/scripts/python/.venv
 source lob_backtester/scripts/python/.venv/bin/activate
-pip install -r lob_backtester/scripts/python/requirements.txt
+pip install -r requirements.txt
 ```
 
 Run the raw data audit and regenerate the deterministic one-hour sample:

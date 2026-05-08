@@ -13,6 +13,13 @@ bool should_fill(const OrderSide side, const double reference_price, const Price
   return reference_price >= static_cast<double>(limit_price);
 }
 
+bool trade_can_fill_order(const OrderSide order_side, const data::TradeSide aggressor_side) {
+  if (order_side == OrderSide::Buy) {
+    return aggressor_side == data::TradeSide::Sell;
+  }
+  return aggressor_side == data::TradeSide::Buy;
+}
+
 double bps_to_rate(const double bps) {
   return bps / 10000.0;
 }
@@ -96,6 +103,9 @@ std::optional<double> FillModel::trade_or_best_quote_reference(const OrderSide s
                                                                const data::MarketEvent &event,
                                                                const book::OrderBook &book) const {
   if (event.type == data::EventType::Trade) {
+    if (!trade_can_fill_order(side, event.payload.trade.side)) {
+      return std::nullopt;
+    }
     return static_cast<double>(event.payload.trade.price_ticks);
   }
   return best_quote_reference(side, book);

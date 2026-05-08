@@ -27,7 +27,8 @@ is:
 4. A strategy emits `OrderIntent` values.
 5. `OrderManager` validates risk gates and tracks the lifecycle of owned
    orders.
-6. `FillModel` fills active limit orders using the price-cross rule.
+6. `FillModel` fills active limit orders using the price-cross rule with
+   opposite-aggressor-side trade filtering.
 7. `Portfolio` and `MetricsEngine` write `metrics.json`, `equity_curve.csv`,
    `inventory.csv`, `orders.csv`, and `fills.csv`.
 
@@ -90,23 +91,23 @@ PnL, drawdown, and markout are reported in engine tick/notional units.
 
 | Strategy | Net PnL | Max DD | Mean inv | Max inv | Turnover qty | Fill rate | Spread captured | Adv 1s | Adv 10s |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Fixed spread | -741593 | 742064 | 0.601 | 10 | 31618 | 0.598724 | 1.001 | -24.153 | -23.945 |
-| A-S | -4345 | 48629.5 | 6.078 | 10 | 30 | 0.001700 | 9.617 | -7.117 | -39.063 |
-| Microprice A-S | -4345 | 48633.5 | 6.071 | 10 | 28 | 0.001559 | 8.304 | -4.321 | -25.750 |
+| Fixed spread | -759847 | 760318 | 0.680 | 10 | 29016 | 0.552349 | 0.014 | -27.261 | -26.572 |
+| A-S | -4346 | 48629.5 | 6.078 | 10 | 30 | 0.001700 | 4.850 | -7.150 | -38.854 |
+| Microprice A-S | -4362 | 48633.5 | 6.083 | 10 | 24 | 0.001376 | 3.292 | -11.688 | -34.792 |
 
-On the base config, A-S and Microprice-A-S have identical net PnL, but
-Microprice-A-S gets fewer fills and better 1s/10s adverse-selection markout.
-Fixed spread produces high turnover and fill rate but loses heavily on PnL and
-drawdown.
+On the base config, A-S and Microprice-A-S are close but not identical:
+Microprice-A-S gets fewer fills, slightly worse net PnL, worse 1s markout, and
+better 10s markout. Fixed spread still produces high turnover and fill rate but
+loses heavily on PnL and drawdown.
 
-Best grid run: `gamma=0.02, k=1.0, beta=1.0`, net PnL `77`.
+Best grid run: `gamma=0.02, k=1.0, beta=1.0`, net PnL `45`.
 Average grid PnL by `beta`:
 
 | beta | Mean grid PnL |
 | ---: | ---: |
-| 0.0 | -6072.389 |
-| 0.5 | -4213.944 |
-| 1.0 | -4383.889 |
+| 0.0 | -7114.667 |
+| 0.5 | -2803.556 |
+| 1.0 | -2940.667 |
 
 On average across the grid, microprice-aware runs (`beta > 0`) are not worse
 than the classic A-S proxy (`beta = 0`) on net PnL for this sample.
@@ -142,19 +143,28 @@ accumulates adverse selection and drawdown quickly.
 A-S sharply reduces turnover and drawdown through wider quotes and inventory
 skew. The cost is a low fill rate and few trades.
 
-The microprice extension is useful as a directional fair-price correction. On
-the base config, net PnL matched A-S while markout improved. In the grid, the
-best result came from higher `gamma=0.02`, `k=1.0`, `beta=1.0`. Average PnL was
-stronger at `beta=0.5` than at `beta=1.0`, suggesting that fully trusting a
-noisy top-of-book imbalance proxy may over-skew quotes.
+The microprice extension is useful as a directional fair-price correction, but
+the base config is not uniformly better than classic A-S after trade-side
+filtering. In the grid, the best result came from higher `gamma=0.02`, `k=1.0`,
+`beta=1.0`. Average PnL was stronger at `beta=0.5` than at `beta=1.0`,
+suggesting that fully trusting a noisy top-of-book imbalance proxy may
+over-skew quotes.
 
 ## 8. Execution Model Limitations
 
-- Execution uses a price-cross model; real queue position is not modeled.
+- Execution uses a price-cross model; trade-side filtering is applied, but real
+  queue position is not modeled.
 - Partial fills are disabled: an order either fills completely or not at all.
 - There is no submit/cancel latency, exchange acknowledgement delay, or jitter.
 - There is no market impact: owned trades do not alter future book state.
 - Market-By-Price data does not allow order-level queue reconstruction.
+- The source data provides full 25-level snapshots. A config `max_depth` above
+  25 keeps the interface ready for deeper feeds but cannot create missing
+  historical depth.
+- `strict_maker` rejects any generated quote that would cross the current book.
+  With large inventory and a long A-S horizon, the reservation-price skew can
+  push one side through the touch, so the strategy may quote one-sided for long
+  periods. This is visible in the low A-S quote uptime.
 - Fees/rebates are supported in config, but the main experiments use zero fees.
 - Volatility is estimated online from rolling mid returns; there is no separate
   train split calibration for `sigma`.
@@ -164,8 +174,9 @@ noisy top-of-book imbalance proxy may over-skew quotes.
 
 ## 9. Improvement Roadmap
 
-The roadmap is based on
-[backtest_engine_plan_avellaneda_stoikov.md §14](backtest_engine_plan_avellaneda_stoikov.md#14-improvement-roadmap):
+The roadmap is based on the historical implementation plan
+[backtest_engine_plan_avellaneda_stoikov.md §14](backtest_engine_plan_avellaneda_stoikov.md#14-improvement-roadmap),
+with completed items removed and follow-up modeling work retained:
 
 1. Partial fills by trade size or available volume.
 2. Queue position model on top of Market-By-Price data.
