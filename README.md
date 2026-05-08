@@ -26,12 +26,16 @@ Implemented:
   mark-to-market equity.
 - MetricsEngine for PnL, inventory, turnover, fill-rate, drawdown,
   market-making metrics, and `metrics.json`/CSV outputs.
+- BacktestEngine event loop integrating DataLoader, OrderBook, features,
+  strategy callbacks, OMS, FillModel, Portfolio, MetricsEngine, and run
+  artifacts including `orders.csv` and `fills.csv`.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
   k-way merge, sample replay, order-book invariants, feature formulas, OMS
-  lifecycle/fill rules, portfolio accounting, and run metrics.
+  lifecycle/fill rules, portfolio accounting, run metrics, engine integration,
+  look-ahead protection, and sample replay throughput.
 
-Next planned task: T8, engine event loop and integration.
+Next planned task: T9, naive fixed-spread strategy.
 
 ## Repository Layout
 
@@ -81,7 +85,7 @@ If `ctest` is not available in the shell, run the test binary directly:
 ```
 
 The current sample integration test drains `757,667` events from `data/sample`
-and records loader throughput in `docs/data_audit.md`.
+and records loader and engine throughput.
 
 ## Run
 
@@ -89,8 +93,8 @@ and records loader throughput in `docs/data_audit.md`.
 ./build/lob_backtest --config lob_backtester/configs/example.yaml
 ```
 
-The current CLI is still a smoke path: it loads the YAML config, logs the path,
-prints parsed parameters, and exits.
+The current CLI runs the configured CSV replay with `strategy.name: noop` and
+writes run artifacts to `run.output_dir`.
 
 ## Data
 

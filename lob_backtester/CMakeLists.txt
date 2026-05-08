@@ -56,11 +56,13 @@ add_library(
   lob_core STATIC
   src/lob/book/OrderBook.cpp
   src/lob/data/CsvDataSource.cpp
+  src/lob/engine/BacktestEngine.cpp
   src/lob/execution/FillModel.cpp
   src/lob/execution/OrderManager.cpp
   src/lob/features/FeatureEngine.cpp
   src/lob/metrics/MetricsEngine.cpp
   src/lob/portfolio/Portfolio.cpp
+  src/lob/strategies/Strategy.cpp
   src/lob/utils/Config.cpp)
 add_library(lob::core ALIAS lob_core)
 
@@ -85,6 +87,7 @@ include(CTest)
 if(BUILD_TESTING)
   add_executable(
     lob_tests
+    tests/backtest_engine_test.cpp
     tests/config_smoke_test.cpp
     tests/data_source_test.cpp
     tests/fill_model_test.cpp

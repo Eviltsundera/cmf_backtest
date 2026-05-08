@@ -1,7 +1,7 @@
 run:
   symbol: MD
-  input_path: ../data/sample
-  output_dir: artifacts/runs/example
+  input_path: data/sample
+  output_dir: lob_backtester/artifacts/runs/example
 
 market:
   tick_size: 0.0000001
@@ -18,7 +18,8 @@ execution:
   taker_bps: 0.0
 
 strategy:
-  name: avellaneda_stoikov
+  name: noop
   gamma: 0.1
   sigma: 0.02
   k: 1.5
+  quote_refresh_ms: 100

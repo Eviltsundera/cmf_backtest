@@ -52,9 +52,11 @@ AppConfig load_config(const std::filesystem::path &path) {
   config.execution.taker_bps = execution["taker_bps"] ? execution["taker_bps"].as<double>() : 0.0;
 
   config.strategy.name = required_value<std::string>(strategy, "name");
-  config.strategy.gamma = required_value<double>(strategy, "gamma");
-  config.strategy.sigma = required_value<double>(strategy, "sigma");
-  config.strategy.k = required_value<double>(strategy, "k");
+  config.strategy.gamma = strategy["gamma"] ? strategy["gamma"].as<double>() : 0.0;
+  config.strategy.sigma = strategy["sigma"] ? strategy["sigma"].as<double>() : 0.0;
+  config.strategy.k = strategy["k"] ? strategy["k"].as<double>() : 0.0;
+  config.strategy.quote_refresh_ms =
+      strategy["quote_refresh_ms"] ? strategy["quote_refresh_ms"].as<std::int64_t>() : 0;
 
   return config;
 }
@@ -75,7 +77,8 @@ std::string describe_config(const AppConfig &config) {
   out << "strategy=" << config.strategy.name << '\n';
   out << "gamma=" << config.strategy.gamma << '\n';
   out << "sigma=" << config.strategy.sigma << '\n';
-  out << "k=" << config.strategy.k;
+  out << "k=" << config.strategy.k << '\n';
+  out << "quote_refresh_ms=" << config.strategy.quote_refresh_ms;
   return out.str();
 }
 

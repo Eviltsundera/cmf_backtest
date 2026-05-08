@@ -35,11 +35,12 @@ directly:
 ./build/lob_backtest --config lob_backtester/configs/example.yaml
 ```
 
-The current CLI is a bootstrap smoke path: it parses the YAML file, logs that the
-configuration was loaded, prints the resolved parameters, and exits with status 0.
+The current CLI runs the configured CSV replay with `strategy.name: noop`, prints
+a short run summary, and writes artifacts to `run.output_dir`.
 
 Implemented engine modules currently include DataLoader, Market-By-Price
-OrderBook, FeatureEngine, OrderManager, FillModel, Portfolio, and MetricsEngine.
+OrderBook, FeatureEngine, Strategy interface, OrderManager, FillModel,
+Portfolio, MetricsEngine, and BacktestEngine.
 
 ## Documentation
 

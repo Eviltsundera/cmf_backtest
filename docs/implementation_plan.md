@@ -331,6 +331,8 @@ adverse-selection markouts by horizon и quote uptime. Выводятся
 
 **Цель:** склеить DataLoader → LOBBuilder → FeatureEngine → Strategy → OMS → FillModel → Portfolio → Metrics.
 
+**Статус:** done 2026-05-08.
+
 **Подзадачи:**
 - `Strategy` интерфейс:
   ```cpp
@@ -350,9 +352,23 @@ adverse-selection markouts by horizon и quote uptime. Выводятся
 - Защита от look-ahead: стратегия видит только уже применённые события.
 
 **DoD:**
-- [ ] Интеграционный тест на синтетическом событийном потоке: dummy strategy выставляет фиксированные quotes, fills и portfolio проверяются в конце.
-- [ ] Тест на отсутствие look-ahead: стратегия не получает данные будущего события на текущем шаге.
-- [ ] Бенчмарк replay sample-а: события/сек, время на event.
+- [x] Интеграционный тест на синтетическом событийном потоке: dummy strategy выставляет фиксированные quotes, fills и portfolio проверяются в конце.
+- [x] Тест на отсутствие look-ahead: стратегия не получает данные будущего события на текущем шаге.
+- [x] Бенчмарк replay sample-а: события/сек, время на event.
+
+**Итог:** добавлены `lob::engine::BacktestEngine`,
+`lob::strategies::IStrategy`, `lob::strategies::MarketState` и
+`NoopStrategy`. Event loop применяет market event к `OrderBook`, проверяет
+fills активных ордеров, обновляет `Portfolio`/`MetricsEngine`, уведомляет
+strategy через `on_fill`, вызывает `on_market_event` по `quote_refresh_ms`,
+передает intents в `OrderManager` и пишет run artifacts:
+`metrics.json`, `equity_curve.csv`, `inventory.csv`, `orders.csv`,
+`fills.csv`.
+
+Проверено: `cmake --build build -j2`,
+`./build/lob_tests --gtest_filter='BacktestEngine*' --gtest_color=no`
+(3/3, sample replay `757,667` events, `~2.26M` events/sec), полный `ctest`,
+`clang-format --dry-run --Werror`, `git diff --check`.
 
 ---
 

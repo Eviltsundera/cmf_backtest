@@ -1,6 +1,6 @@
 # Техническая документация: LOB Backtester
 
-**Статус:** draft, синхронизирован с T7 Portfolio + MetricsEngine.
+**Статус:** draft, синхронизирован с T8 Engine event loop.
 
 Документ описывает целевую архитектуру CMF LOB backtesting engine и то, что уже
 есть в репозитории. Детальный task tracker остается в
@@ -25,7 +25,7 @@ latency и partial fills считаются расширениями, если �
 
 ## 2. Текущая реализация
 
-Сейчас кодовая база находится на уровне T7 Portfolio + MetricsEngine:
+Сейчас кодовая база находится на уровне T8 Engine event loop:
 
 - `lob_backtester/CMakeLists.txt` определяет `lob_core`, `lob_backtest` и
   `lob_tests`.
@@ -49,15 +49,18 @@ latency и partial fills считаются расширениями, если �
   signed inventory, realized/unrealized PnL и mark-to-market equity.
 - `lob_backtester/src/lob/metrics/MetricsEngine.hpp` и `.cpp` агрегируют
   run metrics и пишут `metrics.json`, `equity_curve.csv`, `inventory.csv`.
+- `lob_backtester/src/lob/strategies/Strategy.hpp` и `.cpp` определяют
+  `IStrategy`, `MarketState` и `NoopStrategy`.
+- `lob_backtester/src/lob/engine/BacktestEngine.hpp` и `.cpp` реализуют
+  event loop, scheduler, strategy callbacks и `fills.csv`.
 - `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, загружает YAML,
-  логирует путь, печатает разобранные параметры и завершает работу.
+  запускает CSV replay с `strategy.name: noop`, печатает summary и пишет
+  artifacts в `run.output_dir`.
 - `lob_backtester/configs/example.yaml` содержит smoke config, согласованный с
   `docs/data_audit.md`.
 - `lob_backtester/tests/*_test.cpp` покрывают config, DataLoader, order book,
-  features, OMS, fill model, portfolio accounting и metrics aggregation.
-
-Текущий CLI намеренно остается smoke path. Склейка event loop, strategies и
-полноценные run artifacts подключаются в следующих задачах.
+  features, OMS, fill model, portfolio accounting, metrics aggregation и
+  engine integration.
 
 ## 3. Архитектура верхнего уровня
 
@@ -142,6 +145,33 @@ market data.
 
 Эти признаки должны быть отделены от конкретных strategies.
 
+### Strategy Interface
+
+Определяет callbacks для event-driven стратегий:
+
+- `on_market_event(const MarketEvent&, const MarketState&)`;
+- `on_fill(const Fill&, const MarketState&)`.
+
+`MarketState` содержит только уже примененное состояние текущего события:
+best bid/ask, mid, spread, imbalance, weighted mid, microprice proxy,
+inventory, cash и active-order count.
+
+### BacktestEngine
+
+Склеивает реализованные модули в фиксированном порядке:
+
+1. читает `MarketEvent`;
+2. применяет событие к `OrderBook`;
+3. проверяет active orders через `FillModel`;
+4. применяет fills к `Portfolio` и `MetricsEngine`;
+5. уведомляет strategy через `on_fill`;
+6. вызывает `on_market_event` по `quote_refresh_ms`;
+7. отправляет `OrderIntent` в `OrderManager`;
+8. записывает quote/equity samples и artifacts.
+
+Strategy не получает будущие events: все callbacks строятся из текущего
+события после `OrderBook::apply_event`.
+
 ### OrderManager
 
 Управляет жизненным циклом собственных ордеров.
@@ -191,8 +221,8 @@ MVP rule:
 - quoted spread и spread captured;
 - adverse-selection metrics на заданных горизонтах.
 
-Текущие artifacts: `metrics.json`, `equity_curve.csv`, `inventory.csv`.
-`orders.csv` уже пишет OrderManager; `fills.csv` будет подключен в engine loop.
+Текущие artifacts: `metrics.json`, `equity_curve.csv`, `inventory.csv`,
+`orders.csv`, `fills.csv`.
 
 ## 5. Конфигурация
 
@@ -203,8 +233,8 @@ MVP rule:
 ```yaml
 run:
   symbol: BTCUSDT
-  input_path: ../data/sample
-  output_dir: artifacts/runs/example
+  input_path: data/sample
+  output_dir: lob_backtester/artifacts/runs/example
 
 market:
   tick_size: 0.01
@@ -221,10 +251,11 @@ execution:
   taker_bps: 0.0
 
 strategy:
-  name: avellaneda_stoikov
+  name: noop
   gamma: 0.1
   sigma: 0.02
   k: 1.5
+  quote_refresh_ms: 100
 ```
 
 Будущие задачи расширят схему настройками DataLoader, strategy-specific
@@ -337,6 +368,8 @@ preprocessing откладывается до replay benchmark.
 - OMS lifecycle и risk-gate tests;
 - FillModel buy/sell crossing tests;
 - Portfolio accounting tests;
+- BacktestEngine synthetic integration, look-ahead и sample replay throughput
+  tests;
 - strategy formula tests;
 - integration tests на synthetic streams и позже на `data/sample/`.
 
@@ -347,9 +380,8 @@ data используется для integration и throughput checks после
 
 Ближайшие задачи:
 
-1. T8: склеить DataLoader, OrderBook, FeatureEngine, OMS, FillModel, Portfolio
-   и MetricsEngine в event loop.
-2. T9-T10: добавить fixed-spread baseline и Avellaneda-Stoikov strategy.
+1. T9: добавить fixed-spread baseline strategy.
+2. T10: добавить Avellaneda-Stoikov strategy.
 3. T11-T14: конфиги, dashboard, эксперименты, отчет и финальная полировка.
 
 Финальные deliverables:

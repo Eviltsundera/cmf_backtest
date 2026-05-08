@@ -65,7 +65,8 @@ find lob_backtester/apps lob_backtester/src lob_backtester/tests -name '*.cpp' -
 ## Текущее состояние
 
 T0 bootstrap, T1 data audit, T2 DataLoader, T3 LOBBuilder, T4 FeatureEngine,
-T5 OMS, T6 FillModel и T7 Portfolio/MetricsEngine закрыты. Сейчас в
+T5 OMS, T6 FillModel, T7 Portfolio/MetricsEngine и T8 Engine integration
+закрыты. Сейчас в
 репозитории есть:
 
 - CMake project с `lob_core`, `lob_backtest` и `lob_tests`.
@@ -77,10 +78,14 @@ T5 OMS, T6 FillModel и T7 Portfolio/MetricsEngine закрыты. Сейчас 
 - Portfolio accounting в `lob::portfolio`.
 - MetricsEngine и вывод `metrics.json`, `equity_curve.csv`, `inventory.csv` в
   `lob::metrics`.
-- CLI smoke path: `lob_backtest --config <yaml>`.
+- Strategy interface, `NoopStrategy` и `BacktestEngine` event loop в
+  `lob::strategies`/`lob::engine`.
+- CLI replay path: `lob_backtest --config <yaml>` с `strategy.name: noop`.
+- Run artifacts: `metrics.json`, `equity_curve.csv`, `inventory.csv`,
+  `orders.csv`, `fills.csv`.
 - Example config, config smoke test и DataLoader tests.
 - `docs/data_audit.md` со схемой `MD.zip`.
 - `lob_backtester/scripts/python/audit.py` для аудита raw CSV и регенерации
   `data/sample/`.
 
-Следующая задача по плану: T8, Engine event loop и интеграция.
+Следующая задача по плану: T9, naive fixed-spread strategy.

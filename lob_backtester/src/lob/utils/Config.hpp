@@ -34,6 +34,7 @@ struct StrategyConfig {
   double gamma = 0.0;
   double sigma = 0.0;
   double k = 0.0;
+  std::int64_t quote_refresh_ms = 0;
 };
 
 struct AppConfig {

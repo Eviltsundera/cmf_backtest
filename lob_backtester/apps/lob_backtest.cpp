@@ -1,8 +1,16 @@
+#include "lob/data/CsvDataSource.hpp"
+#include "lob/engine/BacktestEngine.hpp"
+#include "lob/strategies/Strategy.hpp"
 #include "lob/utils/Config.hpp"
 
+#include <cstdint>
 #include <exception>
 #include <filesystem>
 #include <iostream>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <string>
 #include <string_view>
 
 #include <spdlog/spdlog.h>
@@ -28,6 +36,52 @@ std::filesystem::path parse_config_path(const int argc, char **argv) {
   throw std::runtime_error("Missing required --config <path-to-yaml> argument");
 }
 
+lob::execution::FillReference parse_fill_reference(const std::string_view value) {
+  if (value == "trade_price") {
+    return lob::execution::FillReference::TradePrice;
+  }
+  if (value == "best_quote") {
+    return lob::execution::FillReference::BestQuote;
+  }
+  if (value == "mid_price") {
+    return lob::execution::FillReference::MidPrice;
+  }
+  throw std::runtime_error("Unsupported fill_reference: " + std::string(value));
+}
+
+std::int64_t milliseconds_to_nanoseconds(const std::int64_t milliseconds) {
+  constexpr std::int64_t kNsPerMs = 1'000'000;
+  if (milliseconds > std::numeric_limits<std::int64_t>::max() / kNsPerMs ||
+      milliseconds < std::numeric_limits<std::int64_t>::min() / kNsPerMs) {
+    throw std::runtime_error("quote_refresh_ms overflows nanoseconds");
+  }
+  return milliseconds * kNsPerMs;
+}
+
+lob::engine::BacktestEngineConfig
+engine_config_from_app_config(const lob::utils::AppConfig &config) {
+  if (config.execution.fill_model != "price_cross") {
+    throw std::runtime_error("Unsupported fill_model: " + config.execution.fill_model);
+  }
+
+  lob::engine::BacktestEngineConfig engine_config;
+  engine_config.book.max_depth = config.book.max_depth;
+  engine_config.fills.fill_reference = parse_fill_reference(config.execution.fill_reference);
+  engine_config.fills.partial_fills = config.execution.partial_fills;
+  engine_config.fills.maker_bps = config.execution.maker_bps;
+  engine_config.fills.taker_bps = config.execution.taker_bps;
+  engine_config.quote_refresh_ns = milliseconds_to_nanoseconds(config.strategy.quote_refresh_ms);
+  engine_config.output_dir = config.run.output_dir;
+  return engine_config;
+}
+
+std::unique_ptr<lob::strategies::IStrategy> make_strategy(const std::string_view name) {
+  if (name == "noop" || name == "no_op" || name == "none") {
+    return std::make_unique<lob::strategies::NoopStrategy>();
+  }
+  throw std::runtime_error("Strategy is not implemented yet: " + std::string(name));
+}
+
 } // namespace
 
 int main(const int argc, char **argv) {
@@ -40,6 +94,18 @@ int main(const int argc, char **argv) {
     const lob::utils::AppConfig config = lob::utils::load_config(config_path);
     spdlog::info("Loaded LOB backtest config from {}", config_path.string());
     std::cout << lob::utils::describe_config(config) << '\n';
+
+    lob::data::CsvDataSource source(lob::data::csv_config_from_directory(
+        config.run.input_path, config.market.tick_size, config.market.lot_size));
+    std::unique_ptr<lob::strategies::IStrategy> strategy = make_strategy(config.strategy.name);
+    const lob::engine::BacktestResult result =
+        lob::engine::BacktestEngine(engine_config_from_app_config(config)).run(source, *strategy);
+
+    std::cout << "events=" << result.event_counts.total() << '\n';
+    std::cout << "fills=" << result.fill_count << '\n';
+    std::cout << "final_pnl=" << result.metrics.final_pnl << '\n';
+    std::cout << "events_per_second=" << result.events_per_second << '\n';
+    std::cout << "output_dir=" << config.run.output_dir.string() << '\n';
     return 0;
   } catch (const std::exception &error) {
     spdlog::error("{}", error.what());
