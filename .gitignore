@@ -12,6 +12,7 @@ lob_backtester/scripts/python/.venv/
 lob_backtester/scripts/python/__pycache__/
 lob_backtester/scripts/python/.pytest_cache/
 reports/
+submission/
 scripts/python/.venv/
 scripts/python/__pycache__/
 scripts/python/.pytest_cache/

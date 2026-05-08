@@ -1,256 +1,200 @@
-# Техническая документация: LOB Backtester
+# Technical Documentation
 
-**Статус:** draft, синхронизирован с T12 CLI/config polish.
+## 1. Scope
 
-Документ описывает целевую архитектуру CMF LOB backtesting engine и то, что уже
-есть в репозитории. Детальный task tracker остается в
-`docs/implementation_plan.md`.
+This document describes the current CMF LOB backtester implementation. The
+engine is a C++20 event-driven replay system for historical Market-By-Price
+data, owned limit orders, simulated fills, portfolio accounting, metrics, and
+market-making strategies.
 
-## 1. Назначение
+Implemented strategies:
 
-Проект реализует event-driven backtest engine для исторических данных
-лимитной книги. Движок должен воспроизводить market data, поддерживать
-агрегированную LOB, моделировать жизненный цикл собственных лимитных ордеров,
-симулировать исполнения, считать торговые метрики и сравнивать market-making
-стратегии:
-
+- no-op smoke strategy;
 - fixed-spread baseline;
-- Avellaneda-Stoikov 2008;
+- classic Avellaneda-Stoikov;
 - microprice-adjusted Avellaneda-Stoikov.
 
-MVP использует консервативную модель исполнения: ордер исполняется, когда
-рыночная цена пересекает его limit level. Queue priority, market impact,
-latency и partial fills считаются расширениями, если отдельная будущая задача
-не включает их явно.
+Python utilities are used only for data audit, experiment orchestration,
+dashboarding, static export, and submission packaging.
 
-## 2. Текущая реализация
+## 2. File Map
 
-Сейчас кодовая база находится на уровне T12 CLI/config polish:
+- `lob_backtester/apps/lob_backtest.cpp` implements the CLI.
+- `lob_backtester/src/lob/data/` implements the event model and streaming CSV
+  data source.
+- `lob_backtester/src/lob/book/` implements the Market-By-Price order book.
+- `lob_backtester/src/lob/features/` implements reusable book features.
+- `lob_backtester/src/lob/execution/` implements order management and fills.
+- `lob_backtester/src/lob/portfolio/` implements accounting.
+- `lob_backtester/src/lob/metrics/` implements run metrics and CSV/JSON output.
+- `lob_backtester/src/lob/strategies/` implements strategy interfaces and
+  strategy formulas.
+- `lob_backtester/src/lob/engine/` implements the event loop.
+- `lob_backtester/src/lob/utils/` implements config parsing and git metadata.
+- `lob_backtester/tests/` contains unit and integration tests.
+- `lob_backtester/configs/` contains sample strategy configs.
+- `scripts/python/` contains experiment, dashboard, static export, and
+  submission helpers.
+- `docs/` contains the implementation plan, data audit, final report, and
+  design notes.
 
-- `lob_backtester/CMakeLists.txt` определяет `lob_core`, `lob_backtest` и
-  `lob_tests`.
-- `lob_backtester/src/lob/utils/Config.hpp` и `.cpp` загружают YAML-конфиг в
-  типизированные структуры, применяют CLI overrides и считают stable hash
-  эффективного конфига.
-- `lob_backtester/src/lob/data/MarketEvent.hpp` определяет нормализованный
-  market-event contract.
-- `lob_backtester/src/lob/data/DataSource.hpp` определяет `IDataSource` и
-  счетчики событий для replay/integration checks.
-- `lob_backtester/src/lob/data/CsvDataSource.hpp` и `.cpp` реализуют streaming
-  CSV loader с merge по `(ts_ns, seq)`.
-- `lob_backtester/src/lob/book/OrderBook.hpp` и `.cpp` реализуют
-  Market-By-Price книгу с snapshots, depth updates и recovery для crossed book.
-- `lob_backtester/src/lob/features/FeatureEngine.hpp` и `.cpp` считают
-  top-of-book features и rolling volatility.
-- `lob_backtester/src/lob/execution/OrderManager.hpp` и `.cpp` реализуют
-  lifecycle собственных limit orders, risk gates и `orders.csv`.
-- `lob_backtester/src/lob/execution/FillModel.hpp` и `.cpp` реализуют
-  directional fill checks, maker/taker fees и active-order fill pass.
-- `lob_backtester/src/lob/portfolio/Portfolio.hpp` и `.cpp` ведут cash,
-  signed inventory, realized/unrealized PnL и mark-to-market equity.
-- `lob_backtester/src/lob/metrics/MetricsEngine.hpp` и `.cpp` агрегируют
-  run metrics и пишут `metrics.json`, `equity_curve.csv`, `inventory.csv`.
-- `lob_backtester/src/lob/strategies/Strategy.hpp` и `.cpp` определяют
-  `IStrategy`, `MarketState`, `NoopStrategy`, `FixedSpreadStrategy`,
-  `AvellanedaStoikovStrategy`, classic/microprice fair-price modes и
-  тестируемые A-S formula helpers.
-- `lob_backtester/src/lob/engine/BacktestEngine.hpp` и `.cpp` реализуют
-  event loop, scheduler, strategy callbacks и `fills.csv`.
-- `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, repeated
-  `--override key=value` и `--json`, загружает YAML, выставляет log level из
-  конфига, запускает CSV replay с `strategy.name: noop`, `fixed_spread` или
-  `avellaneda_stoikov`/`microprice_as`, печатает summary и пишет artifacts в
-  `run.output_dir`.
-- `lob_backtester/configs/example.yaml` содержит smoke config, согласованный с
-  `docs/data_audit.md`.
-- `lob_backtester/configs/baseline_fixed_spread.yaml` содержит sample run config
-  для baseline fixed-spread стратегии.
-- `lob_backtester/configs/avellaneda_stoikov.yaml` содержит sample run config
-  для классической A-S стратегии.
-- `lob_backtester/configs/microprice_as.yaml` содержит sample run config для
-  microprice-adjusted A-S стратегии.
-- `lob_backtester/tests/*_test.cpp` покрывают config, DataLoader, order book,
-  features, OMS, fill model, portfolio accounting, metrics aggregation и
-  engine integration.
+## 3. Event Loop
 
-## 3. Архитектура верхнего уровня
+The engine follows a fixed event-driven pipeline:
 
-Движок строится как event-driven pipeline:
+1. Read the next `MarketEvent`.
+2. Apply the event to the public order book.
+3. Record due adverse-selection markouts for prior fills.
+4. Check active owned orders with `FillModel`.
+5. Apply fills to `Portfolio` and `MetricsEngine`.
+6. Notify the strategy through `on_fill`.
+7. Invoke `on_market_event` according to `quote_refresh_ms`.
+8. Send returned `OrderIntent` values to `OrderManager`.
+9. Record active quote samples and mark-to-market equity.
+10. Write final artifacts when replay finishes.
 
-```text
-Raw data
-  -> DataLoader
-  -> MarketEvent stream
-  -> LOBBuilder / OrderBook
-  -> FeatureEngine
-  -> FillModel
-  -> Strategy
-  -> OrderManager
-  -> Portfolio
-  -> MetricsEngine
-  -> reports and CSV/JSON artifacts
-```
+This ordering is intentional. A strategy callback is built from the current
+book state after the event has been applied, and it never receives future
+events.
 
-Порядок event loop должен оставаться фиксированным:
+## 4. Data Model
 
-1. Прочитать следующий `MarketEvent`.
-2. Применить событие к публичной order book.
-3. Проверить активные собственные ордера на fills относительно текущего
-   market state.
-4. Уведомить portfolio и strategy о fills.
-5. Дать strategy увидеть только текущее состояние и вернуть `OrderIntent`.
-6. Дать order manager провалидировать, выставить, отменить или заменить
-   ордера.
-7. Обновить metrics и опциональные artifacts.
+`CsvDataSource` reads:
 
-Такой порядок снижает риск look-ahead bias: стратегия не получает будущие
-market data.
+- `lob.csv`: full 25-level book snapshots;
+- `trades.csv`: trades;
+- optional `depth_updates.csv`: incremental level updates if available.
 
-## 4. Ответственность модулей
+The provided dataset contains snapshots and trades only. Timestamps are
+microseconds since Unix epoch in UTC. The loader normalizes timestamps to
+nanoseconds, prices to integer ticks, and quantities to integer lots.
 
-### DataLoader
+The deterministic merge key is `(local_timestamp, source_priority, row_id)`.
+Snapshot events are applied before trades at the same timestamp so the book is
+current before fill checks.
 
-Читает raw historical files и отдает нормализованные события, отсортированные
-по `(timestamp, sequence)`.
+## 5. Order Book
 
-Целевая ответственность:
+`OrderBook` maintains an aggregate Market-By-Price book:
 
-- использовать схему из `docs/data_audit.md`: CSV-only `book_snapshot_25` +
-  `trade`, timestamp в microseconds;
-- нормализовать timestamps в наносекунды;
-- нормализовать prices и quantities к `tick_size` и `lot_size`;
-- валидировать монотонность timestamp и дубликаты;
-- стримить события без загрузки всего датасета в память.
+- bids sorted by descending price;
+- asks sorted by ascending price;
+- zero-size updates remove levels;
+- `max_depth` limits retained depth;
+- locked/crossed books can be rejected or recovered according to config.
 
-Текущая реализация:
+The book exposes best bid/ask, spread, mid, and depth-level accessors. It is
+used by both features and execution checks.
 
-- `CsvDataSource` читает `lob.csv`, `trades.csv` и опциональный
-  `depth_updates.csv`;
-- `MarketEvent::ts_ns` хранит timestamp в ns;
-- `MarketEvent::seq` кодирует `(source_priority, row_id)`;
-- payload хранит prices как integer ticks и quantities как integer lots;
-- equal-timestamp priority: snapshot, depth update, trade.
+## 6. Feature Engine
 
-### OrderBook
+Reusable book features:
 
-Поддерживает агрегированную Market-By-Price book.
-
-Целевая ответственность:
-
-- применять snapshots и depth updates;
-- хранить bids по убыванию цены, asks по возрастанию;
-- удалять price level при нулевом size;
-- отдавать best bid/ask, mid, spread и depth levels;
-- детектить locked/crossed book и применять настроенную recovery policy.
-
-### FeatureEngine
-
-Считает переиспользуемые признаки order book:
-
-- `mid`;
-- `spread`;
+- `mid = (best_bid + best_ask) / 2`;
+- `spread = best_ask - best_bid`;
 - top-of-book imbalance;
 - weighted mid;
 - microprice proxy;
-- rolling volatility estimator.
+- rolling population standard deviation of mid returns.
 
-Эти признаки должны быть отделены от конкретных strategies.
+These features are kept independent of strategy logic so they can be reused by
+baseline strategies, A-S strategies, metrics, and tests.
 
-### Strategy Interface
+## 7. Order Management
 
-Определяет callbacks для event-driven стратегий:
+`OrderManager` owns the lifecycle of strategy orders. Supported intents:
 
-- `on_market_event(const MarketEvent&, const MarketState&)`;
-- `on_fill(const Fill&, const MarketState&)`.
+- `SubmitLimit`;
+- `Cancel`;
+- `CancelAll`;
+- `Replace`.
 
-`MarketState` содержит только уже примененное состояние текущего события:
-best bid/ask, mid, spread, imbalance, weighted mid, microprice proxy,
-inventory, cash и active-order count.
+Risk gates validate:
 
-### BacktestEngine
+- positive price and quantity;
+- tick alignment;
+- maximum inventory under worst-case same-side active fills;
+- maker-only constraints when enabled.
 
-Склеивает реализованные модули в фиксированном порядке:
+The manager writes `orders.csv` with submitted, cancelled, rejected, replaced,
+and filled lifecycle events.
 
-1. читает `MarketEvent`;
-2. применяет событие к `OrderBook`;
-3. проверяет active orders через `FillModel`;
-4. применяет fills к `Portfolio` и `MetricsEngine`;
-5. уведомляет strategy через `on_fill`;
-6. вызывает `on_market_event` по `quote_refresh_ms`;
-7. отправляет `OrderIntent` в `OrderManager`;
-8. записывает quote/equity samples и artifacts.
+## 8. Fill Model
 
-Strategy не получает будущие events: все callbacks строятся из текущего
-события после `OrderBook::apply_event`.
+The MVP fill model is price-cross execution:
 
-### OrderManager
+- a buy limit fills when the selected fill reference is at or below the limit;
+- a sell limit fills when the selected fill reference is at or above the limit;
+- fill price is the owned order's limit price;
+- partial fills are disabled by default.
 
-Управляет жизненным циклом собственных ордеров.
+Supported fill references:
 
-Целевая ответственность:
+- `trade_price`;
+- `best_quote`;
+- `mid_price`.
 
-- принимать intents `SubmitLimit`, `Cancel`, `CancelAll` и `Replace`;
-- назначать order ids;
-- применять risk gates: max inventory, min quantity, tick alignment,
-  maker-only behavior, если включено;
-- писать artifacts жизненного цикла, например `orders.csv`.
+Maker/taker fees are configured in basis points. Negative maker bps are allowed
+to represent maker rebates.
 
-### FillModel
+## 9. Portfolio
 
-Симулирует исполнение активных собственных ордеров.
+`Portfolio` tracks:
 
-MVP rule:
+- cash;
+- signed position;
+- average entry price;
+- realized PnL;
+- unrealized PnL;
+- mark-to-market equity;
+- fees.
 
-- buy limit исполняется, если `fill_reference <= limit_price`;
-- sell limit исполняется, если `fill_reference >= limit_price`;
-- fill price равен limit price ордера;
-- partial fills по умолчанию выключены.
+The accounting supports long positions, short positions, reductions, and
+reversals.
 
-Планируемые references: `trade_price`, `best_quote`, `mid_price`. Fees задаются
-через maker/taker basis points.
+## 10. Metrics
 
-### Portfolio
-
-Отслеживает cash, position, realized/unrealized PnL и fees.
-
-Текущая ответственность:
-
-- детерминированно применять fills;
-- считать mark-to-market equity по текущему market state;
-- отдавать inventory и cash для strategy risk limits и metrics.
-- поддерживать long, short и reversal accounting через average entry price.
-
-### MetricsEngine
-
-Агрегирует run-level outputs:
+`MetricsEngine` records:
 
 - final PnL;
 - mean/max inventory;
-- turnover by quantity and notional;
-- fill count и fill rate;
-- drawdown;
-- quoted spread и spread captured;
-- adverse-selection markout на горизонтах 1s и 10s.
+- inventory standard deviation;
+- turnover quantity and notional;
+- fill count and fill rate;
+- maximum drawdown;
+- average quoted spread;
+- average spread captured;
+- quote uptime;
+- adverse-selection markout at 1s and 10s horizons.
 
-Текущие artifacts: `run_metadata.json`, `metrics.json`, `equity_curve.csv`,
-`inventory.csv`, `orders.csv`, `fills.csv`.
+Artifacts written per run:
 
-## 5. Конфигурация
+- `run_metadata.json`;
+- `metrics.json`;
+- `equity_curve.csv`;
+- `inventory.csv`;
+- `orders.csv`;
+- `fills.csv`.
 
-Конфиги лежат в `lob_backtester/configs/`.
+`run_metadata.json` contains the effective config hash, git commit, UTC
+timestamp, config path, and applied overrides.
 
-Текущая схема:
+## 11. Configuration
+
+YAML configs live under `lob_backtester/configs/`.
+
+Main sections:
 
 ```yaml
 run:
-  symbol: BTCUSDT
+  symbol: MD
   input_path: data/sample
-  output_dir: lob_backtester/artifacts/runs/example
+  output_dir: reports/example
   log_level: info
 
 market:
-  tick_size: 0.01
-  lot_size: 0.000001
+  tick_size: 0.0000001
+  lot_size: 1.0
 
 book:
   max_depth: 50
@@ -267,13 +211,13 @@ execution:
 
 strategy:
   name: noop
-  gamma: 0.1
-  sigma: 0.02
-  k: 1.5
+  gamma: 0.01
+  sigma: 1.0
+  k: 1.0
   horizon_seconds: 3600.0
   sigma_window_ms: 1000
   min_spread_ticks: 2
-  fair_price_mode: mid
+  fair_price_mode: microprice_proxy
   microprice_alpha: 1.0
   microprice_beta: 1.0
   delta_ticks: 1
@@ -282,220 +226,165 @@ strategy:
   quote_refresh_ms: 100
 ```
 
-Также loader принимает plan-style aliases из исходной спецификации: `data.path`,
-`data.tick_size`, `data.lot_size`, `data.max_depth`, `engine.quote_refresh_ms`,
-`fees.maker_bps`, `fees.taker_bps`, `portfolio.initial_cash` и
-`portfolio.max_inventory`. Значения из current schema имеют приоритет, если
-оба варианта присутствуют. CLI overrides применяются после YAML загрузки:
-`--override strategy.gamma=0.05`, `--override run.output_dir=/tmp/run` и т.д.
-`config_hash` считается по эффективному конфигу после overrides.
+Plan-style aliases from the original specification are also supported:
+`data.path`, `data.tick_size`, `data.lot_size`, `data.max_depth`,
+`engine.quote_refresh_ms`, `fees.maker_bps`, `fees.taker_bps`, and
+`portfolio.max_inventory`.
 
-Для fixed-spread baseline используется `strategy.name: fixed_spread`; CLI также
-поддерживает aliases `baseline_fixed` и `fixed`. Для классической модели
-используется `strategy.name: avellaneda_stoikov`; aliases: `avellaneda`, `as`.
-Для microprice extension используется `strategy.name: microprice_as`;
-поддерживаются aliases `microprice_avellaneda_stoikov` и `mp_as`, а
-`fair_price_mode` должен быть `microprice_proxy`.
-`quote_refresh_ms` остается engine scheduler параметром, `initial_cash`
-передается в portfolio, а `max_inventory` дополнительно прокидывается в OMS
-risk gate. `run.log_level` поддерживает `trace`, `debug`, `info`, `warn`,
-`error`, `critical` и `off`.
-
-## 6. Модели стратегий
-
-### Fixed Spread Baseline
-
-`FixedSpreadStrategy` является sanity baseline. На каждом scheduled callback
-она генерирует:
-
-```text
-cancel_all(strategy_id)
-bid = floor(mid - delta_ticks)
-ask = ceil(mid + delta_ticks)
-```
-
-Bid не выставляется, если возможное исполнение превысит long-side
-`max_inventory`; ask не выставляется, если возможное исполнение превысит
-short-side лимит. Если mid отсутствует или quote prices невалидны, стратегия
-только снимает старые заявки. CLI включает maker-only risk gate для этой
-стратегии.
-
-### Avellaneda-Stoikov
-
-Классическая стратегия строит quotes вокруг reservation price:
-
-```text
-r_t = mid - q * gamma * sigma^2 * (T - t)
-```
-
-Total spread:
-
-```text
-psi_t = gamma * sigma^2 * (T - t) + (2 / gamma) * ln(1 + gamma / k)
-```
-
-Quotes округляются к tick size:
-
-```text
-bid = round_down(r_t - psi_t / 2, tick_size)
-ask = round_up(r_t + psi_t / 2, tick_size)
-```
-
-Inventory `q` смещает reservation price. Положительный inventory должен
-двигать reservation price вниз, отрицательный inventory - вверх.
-
-Текущая реализация:
-
-- `AvellanedaStoikovStrategy` на каждом scheduled callback сначала снимает
-  старые заявки через `cancel_all`, затем строит новые maker quotes.
-- `sigma_window_ms` задает time-window rolling std по mid-returns; до
-  накопления двух returns используется стартовое значение `sigma` из YAML.
-- Rolling return std переводится в tick-volatility через умножение на текущий
-  mid, чтобы формула работала в price-tick units.
-- `horizon_seconds` интерпретируется как оставшееся время от первого
-  strategy callback; после истечения горизонта inventory term становится нулем.
-- `min_spread_ticks`, maker-only checks и `max_inventory` защищают от crossed
-  quotes и неконтролируемого inventory.
-
-### Microprice Extension
-
-Microprice variant корректирует fair price через imbalance:
-
-```text
-r_t = mid + beta * (microprice - mid) - q * gamma * sigma^2 * (T - t)
-```
-
-В MVP microprice - proxy на основе top-of-book imbalance. Learned microprice
-table является stretch goal и должен оставаться в roadmap, если не будет
-реализован отдельной задачей.
-
-Реализация T11 переиспользует `AvellanedaStoikovStrategy` с режимом
-`FairPriceMode::MicropriceProxy`:
-
-- `microprice_proxy = mid + microprice_alpha * (spread / 2) * imbalance`;
-- `fair_price = mid + microprice_beta * (microprice_proxy - mid)`;
-- при `microprice_beta = 0` стратегия численно совпадает с classic A-S на том
-  же потоке состояний.
-
-## 7. Build, Test, Run
-
-Из корня репозитория:
+CLI overrides are applied after YAML loading:
 
 ```bash
-cmake -S lob_backtester -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
-ctest --test-dir build --output-on-failure
-./build/lob_backtest --config lob_backtester/configs/example.yaml
-./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
-./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
-./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml
 ./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml \
   --override strategy.gamma=0.05 \
   --override run.output_dir=/tmp/cmf-as-gamma-005 \
   --json
 ```
 
-Проверка форматирования:
+The `config_hash` is computed from the effective config after overrides.
+
+## 12. Strategy Models
+
+### Fixed Spread
+
+The baseline cancels old orders and posts:
+
+```text
+bid = floor(mid - delta_ticks)
+ask = ceil(mid + delta_ticks)
+```
+
+It stops quoting a side when a possible fill would exceed `max_inventory`.
+Maker-only validation is enabled by the CLI.
+
+### Avellaneda-Stoikov
+
+Classic A-S builds quotes around a reservation price:
+
+```text
+r_t = mid - q * gamma * sigma^2 * (T - t)
+psi_t = gamma * sigma^2 * (T - t) + (2 / gamma) * ln(1 + gamma / k)
+bid = floor(r_t - psi_t / 2)
+ask = ceil(r_t + psi_t / 2)
+```
+
+Implementation details:
+
+- every scheduled callback emits `cancel_all` and then new maker quotes;
+- `sigma_window_ms` controls rolling mid-return volatility;
+- the initial `sigma` is used until at least two returns are available;
+- rolling return standard deviation is converted into tick volatility by
+  multiplying by the current mid;
+- `horizon_seconds` starts from the first strategy callback;
+- `min_spread_ticks`, maker-only checks, and `max_inventory` prevent crossed
+  quotes and uncontrolled inventory.
+
+### Microprice A-S
+
+The microprice variant adjusts fair price using top-of-book imbalance:
+
+```text
+microprice_proxy = mid + microprice_alpha * (spread / 2) * imbalance
+fair_price = mid + microprice_beta * (microprice_proxy - mid)
+r_t = fair_price - q * gamma * sigma^2 * (T - t)
+```
+
+`microprice_beta = 0` is numerically equivalent to classic A-S on the same
+state stream. Learned microprice is not part of the MVP and remains a roadmap
+item.
+
+## 13. Build, Test, And Format
+
+Build:
+
+```bash
+cmake -S lob_backtester -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+```
+
+Run tests:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+Run the CLI:
+
+```bash
+./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
+./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
+./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml
+```
+
+Format check:
 
 ```bash
 find lob_backtester/apps lob_backtester/src lob_backtester/tests -name '*.cpp' -o -name '*.hpp' \
   | xargs clang-format --dry-run --Werror
 ```
 
-Python helper environment:
+## 14. Reporting And Experiments
 
-```bash
-python3.11 -m venv lob_backtester/scripts/python/.venv
-source lob_backtester/scripts/python/.venv/bin/activate
-pip install -r lob_backtester/scripts/python/requirements.txt
-```
-
-## 8. Данные и artifacts
-
-Raw market data хранится только локально. Не добавляй скачанные архивы и
-распакованные файлы в git.
-
-Планируемая структура data:
-
-```text
-data/
-  MD.zip
-  raw/
-  sample/
-```
-
-Планируемая структура run artifacts:
-
-```text
-artifacts/runs/<run_name>/
-  run_metadata.json
-  metrics.json
-  orders.csv
-  fills.csv
-  equity_curve.csv
-  inventory.csv
-```
-
-`run_metadata.json` содержит `config_hash`, `git_commit`, `timestamp_utc`,
-`config_path` и список примененных overrides. `metrics.json` остается основным
-machine-readable output для метрик, а `--json` печатает краткое summary run'а в
-stdout.
-
-Reporting layer читает эти artifacts без дополнительной C++ сборки:
+Run the full experiment set:
 
 ```bash
 python3 scripts/python/run_experiments.py
-streamlit run scripts/python/dashboard.py -- --reports-dir reports/
-streamlit run scripts/python/dashboard.py -- --reports-dir data/sample_reports
-python scripts/python/export_static.py --run data/sample_reports/avellaneda_stoikov
 ```
 
-`run_experiments.py` запускает три базовых strategy config'а и 3x3x3 grid по
-`gamma/k/beta`, пишет `reports/experiment_summary.md` и static sensitivity
-heatmaps. `dashboard.py` поддерживает single-run и compare-mode, overview
-metrics, equity/drawdown, inventory, quoting diagnostics, fills table,
-adverse-selection bars и sensitivity heatmaps для grid-run директорий.
-`export_static.py` пишет `summary.md` и `plots/*.png` в
-`reports/_static/<run>/` или рядом с указанным reports root, чтобы submission
-можно было открыть без Streamlit. Для clean-checkout demo в репозитории есть
-маленькие tracked fixtures в `data/sample_reports/`; полные generated outputs
-остаются в ignored `reports/`.
+Open the dashboard:
 
-`docs/data_audit.md` фиксирует схему данных, единицу timestamp, типы колонок,
-sample interval и решение по preprocessing. MVP читает CSV напрямую; binary
-preprocessing откладывается до replay benchmark.
+```bash
+streamlit run scripts/python/dashboard.py -- --reports-dir reports/
+```
 
-## 9. Стратегия тестирования
+Use tracked sample fixtures on a clean checkout:
 
-Тестирование должно следовать границам задач из `docs/implementation_plan.md`.
+```bash
+streamlit run scripts/python/dashboard.py -- --reports-dir data/sample_reports
+```
 
-Минимальное ожидаемое покрытие по зонам:
+Export a static report for one run:
 
-- config parsing smoke tests;
-- DataLoader parser и timestamp-order tests;
-- OrderBook invariants и crossed-book handling;
-- FeatureEngine numerical tests;
-- OMS lifecycle и risk-gate tests;
-- FillModel buy/sell crossing tests;
-- Portfolio accounting tests;
-- BacktestEngine synthetic integration, look-ahead и sample replay throughput
-  tests;
-- strategy formula tests;
-- integration tests на synthetic streams и позже на `data/sample/`.
+```bash
+python scripts/python/export_static.py --run reports/microprice_as
+```
 
-Synthetic tests предпочтительны для детерминированных edge cases. Real sample
-data используется для integration и throughput checks после T1.
+Package a submission directory:
 
-## 10. Roadmap
+```bash
+python3 scripts/python/package_submission.py --output submission/cmf_lob_backtester
+```
 
-Ближайшие задачи:
+`run_experiments.py` runs the three base configs plus a 3x3x3
+`gamma/k/beta` grid and writes `reports/experiment_summary.md` and static
+sensitivity heatmaps. `package_submission.py` copies README, configs, source,
+tests, sample data, report docs, base run artifacts, and charts into an ignored
+submission directory.
 
-1. T13-T14: dashboard, эксперименты, отчет и финальная полировка.
+## 15. Test Strategy
 
-Финальные deliverables:
+Coverage areas:
 
-- runnable CLI backtester;
-- configs для baseline, Avellaneda-Stoikov и microprice A-S;
-- tests и sample data;
-- experiment artifacts;
-- final report и reproducibility instructions.
+- config parsing and overrides;
+- CSV parsing and timestamp-order validation;
+- order-book snapshot/update behavior and crossed-book recovery;
+- feature formulas and rolling volatility;
+- order lifecycle and risk gates;
+- fill model behavior, fee validation, and maker rebates;
+- portfolio accounting;
+- metrics aggregation and atomic validation;
+- strategy formulas and inventory guards;
+- engine integration, no look-ahead behavior, sample replay throughput, and
+  adverse-selection markout.
+
+Synthetic tests cover deterministic edge cases. The committed one-hour sample
+is used for integration and throughput checks.
+
+## 16. Final Deliverables
+
+- C++ backtest engine and strategy source.
+- YAML configs for fixed spread, classic A-S, and microprice A-S.
+- Unit and integration tests.
+- Committed sample dataset.
+- Experiment runner and dashboard.
+- Final report and technical documentation.
+- Reproducible local submission package.

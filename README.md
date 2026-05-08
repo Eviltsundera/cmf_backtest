@@ -46,6 +46,8 @@ Implemented:
 - T14 experiment runner for baseline, A-S, microprice A-S, and 3x3x3
   `gamma/k/beta` sensitivity grid, with final report and tracked heatmap
   assets.
+- T15 submission packaging workflow with English documentation and a local
+  reproducible package under ignored `submission/`.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
   k-way merge, sample replay, order-book invariants, feature formulas, OMS
@@ -53,7 +55,7 @@ Implemented:
   look-ahead protection, fixed-spread, Avellaneda-Stoikov, microprice A-S
   strategy behavior, and sample replay throughput.
 
-Next planned task: T15, submission package.
+Next planned work: optional roadmap items beyond the MVP submission.
 
 ## Repository Layout
 
@@ -162,6 +164,12 @@ Export a static submission report without Streamlit:
 
 ```bash
 python scripts/python/export_static.py --run data/sample_reports/avellaneda_stoikov
+```
+
+Build a local submission package after generating `reports/`:
+
+```bash
+python3 scripts/python/package_submission.py --output submission/cmf_lob_backtester
 ```
 
 Generate fresh sample run artifacts into ignored `reports/` directories:

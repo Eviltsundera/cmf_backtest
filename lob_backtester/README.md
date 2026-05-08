@@ -86,6 +86,12 @@ python3 scripts/python/run_experiments.py
 streamlit run scripts/python/dashboard.py -- --reports-dir reports/
 ```
 
+Build the local submission package:
+
+```bash
+python3 scripts/python/package_submission.py --output submission/cmf_lob_backtester
+```
+
 To run the same configs against a local full dataset, pass an input override:
 
 ```bash

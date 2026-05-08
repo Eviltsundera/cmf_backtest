@@ -1,42 +1,57 @@
-ступительный экзамен:
+# Entrance Exam Task
 
-Цель:
-Разработка движка обратного тестирования, способного воспроизводить исторические данные и оценивать эффективность стратегии
+## Goal
 
-Языки программирования: C++ или Python
+Develop a backtesting engine that can replay historical limit-order-book data
+and evaluate a market-making strategy.
 
-Минимальные требования
-- Моделирование лимитной книги заказов
-- Размещение и отмена лимитных заказов
-- Моделирование выполнения приказов
-- Частичное заполнение необязательно
+## Programming Language
 
-Базовые метрики: PnL, запасы, оборот кадров
+C++ or Python.
 
-Реализация стратегии
-- Реализация Авельянеды–Стойкова (2008)
-- Улучшение с помощью расширений microprice + Avellaneda–Stoikov (2018)
-- Проведение экспериментов по моделированию
+## Minimum Requirements
 
-Предположение о исполнении
-Исполнение происходит, когда рыночная цена пересекает уровень ордера
+- Limit-order-book simulation.
+- Limit order placement and cancellation.
+- Order execution simulation.
+- Partial fills are optional.
 
-Результаты
+Baseline metrics:
 
-Тестировщик обратного:
-- Интегрированный движок для обратного тестирования
-- Примерный набор данных и конфигурации
-- Отчет о эффективности
-- Техническая документация
+- PnL.
+- Inventory.
+- Turnover.
 
-Стратегия:
-- Исходный код
-- Описание модели
-- Результаты производительности
-- Дорожная карта по улучшению
+## Strategy Implementation
 
-Данные моделирования:
-https://lnkd.in/dQwbFDX3
+- Implement Avellaneda-Stoikov (2008).
+- Improve it with microprice plus Avellaneda-Stoikov (2018) extensions.
+- Run simulation experiments.
 
-Форма подачи заявки:
-https://lnkd.in/dkPmt8v8
+## Execution Assumption
+
+An order is executed when the market price crosses the order level.
+
+## Expected Results
+
+Backtester deliverables:
+
+- Integrated backtesting engine.
+- Sample dataset and configs.
+- Performance report.
+- Technical documentation.
+
+Strategy deliverables:
+
+- Source code.
+- Model description.
+- Performance results.
+- Improvement roadmap.
+
+## Simulation Data
+
+Historical market data is supplied separately as `MD.zip`.
+
+## Submission Form
+
+Submit the final package through the provided application form.
