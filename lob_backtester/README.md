@@ -31,6 +31,11 @@ ctest --test-dir build --output-on-failure
 The current CLI is a bootstrap smoke path: it parses the YAML file, logs that the
 configuration was loaded, prints the resolved parameters, and exits with status 0.
 
+## Documentation
+
+- [Implementation plan](../docs/implementation_plan.md)
+- [Technical documentation](../docs/technical_documentation.md)
+
 ## Format And Lint
 
 ```bash
