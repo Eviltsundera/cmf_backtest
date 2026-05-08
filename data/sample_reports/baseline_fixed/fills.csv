@@ -1,0 +1,4 @@
+ts_ns,order_id,strategy_id,side,limit_price_ticks,fill_price_ticks,quantity_lots,liquidity_role,fee
+1722837600681617000,3,1,buy,68869,68869,1,maker,0
+1722837600888581000,5,1,buy,68869,68869,1,maker,0
+1722837601062562000,7,1,buy,68825,68825,1,maker,0

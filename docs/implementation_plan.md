@@ -528,7 +528,7 @@ plan-style aliases, config hash и invalid override rejection. Verification:
   7. **Sensitivity** (если в директории есть grid run'ов) — Plotly heatmap по парам `(γ, β)`, `(γ, k)` и т.п. для PnL/Sharpe-like/turnover.
 - **Экспорт для submission:** кнопка «Export static report» в Streamlit → генерирует `reports/_static/<run>/summary.md` + `plots/*.png` (через `plotly.io.write_image` + `kaleido`). Автоматически вызывается также из CLI: `python scripts/python/export_static.py --run <dir>` — нужно для submission package, чтобы ревьюеру не пришлось ставить Streamlit.
 - **Cache:** `@st.cache_data` для чтения CSV — мгновенное переключение между tabs.
-- `requirements.txt` обновить: `streamlit>=1.32`, `plotly>=5.20`, `kaleido` (для static export), `pandas`, `pyarrow`.
+- `requirements.txt` обновить: `streamlit>=1.57`, `plotly>=5.20`, `kaleido` (для static export), `pandas`, `pyarrow`.
 
 **Итог:** добавлены [scripts/python/dashboard.py](../scripts/python/dashboard.py),
 [scripts/python/export_static.py](../scripts/python/export_static.py) и общий
@@ -536,7 +536,9 @@ reporting-модуль. Dashboard читает директории с `metrics.
 single/compare mode, time-window фильтр, equity/drawdown, inventory,
 quoting diagnostics, fills table, adverse-selection и sensitivity heatmap.
 Static export пишет `summary.md` и `plots/*.png`; `kaleido` зафиксирован на
-`<1`, чтобы не требовать отдельную установку Chrome.
+`<1`, чтобы не требовать отдельную установку Chrome. Для clean-checkout demo
+добавлены маленькие tracked fixtures в `data/sample_reports/`; полные outputs
+остаются в ignored `reports/`.
 
 **DoD:**
 - [x] `streamlit run scripts/python/dashboard.py -- --reports-dir reports/` поднимает дашборд на localhost; все 7 tabs рендерятся без ошибок на 1+ run'е.

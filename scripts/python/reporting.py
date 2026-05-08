@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 
 
 DEFAULT_REPORTS_DIR = Path("reports")
-FALLBACK_REPORTS_DIR = Path("lob_backtester/artifacts/runs")
+FALLBACK_REPORTS_DIR = Path("data/sample_reports")
 
 METRIC_ORDER = [
     "final_pnl",
@@ -58,7 +58,7 @@ class RunArtifacts:
 
 
 def resolve_reports_dir(requested: Path) -> Path:
-    """Use the requested reports dir, falling back to committed sample artifacts."""
+    """Use the requested reports dir, falling back to tracked sample fixtures."""
     requested = requested.expanduser()
     if requested.exists():
         return requested
@@ -211,8 +211,14 @@ def style_metric_table(frame: pd.DataFrame) -> pd.io.formats.style.Styler:
             return styles
 
         metric = str(row.name)
-        best = numeric.min() if metric in LOWER_IS_BETTER else numeric.max()
-        worst = numeric.max() if metric in LOWER_IS_BETTER else numeric.min()
+        if metric in LOWER_IS_BETTER:
+            best = numeric.min()
+            worst = numeric.max()
+        elif metric in HIGHER_IS_BETTER:
+            best = numeric.max()
+            worst = numeric.min()
+        else:
+            return styles
         for idx, value in enumerate(row):
             if not isinstance(value, (int, float)):
                 continue

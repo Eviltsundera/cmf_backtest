@@ -1,0 +1,16 @@
+{
+  "config_hash": "sample-avellaneda-stoikov",
+  "git_commit": "sample-fixture",
+  "timestamp_utc": "2026-05-08T00:00:00Z",
+  "config_path": "lob_backtester/configs/avellaneda_stoikov.yaml",
+  "overrides": [
+    {
+      "key": "strategy.gamma",
+      "value": "0.01"
+    },
+    {
+      "key": "strategy.k",
+      "value": "1.5"
+    }
+  ]
+}

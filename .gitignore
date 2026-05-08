@@ -1,6 +1,7 @@
 build/
 cmake-build-*/
 .cache/
+.venv/
 .vscode/
 .idea/
 compile_commands.json
@@ -14,6 +15,7 @@ reports/
 scripts/python/.venv/
 scripts/python/__pycache__/
 scripts/python/.pytest_cache/
+data/sample_reports/_static/
 
 data/raw/
 *.zip

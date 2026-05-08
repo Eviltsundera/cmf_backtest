@@ -1,0 +1,15 @@
+{
+  "final_pnl": -741593,
+  "mean_inventory": 0.601112753769,
+  "max_inventory": 10,
+  "inventory_std": 6.50985862179,
+  "turnover_qty": 31618,
+  "turnover_notional": 2059292851,
+  "fill_count": 31618,
+  "fill_rate": 0.598723702399,
+  "max_drawdown": 742064,
+  "avg_quoted_spread": 2.67297731086,
+  "avg_spread_captured": 1.00072743374,
+  "quote_uptime": 0.0361821222252,
+  "adverse_selection_h": {}
+}

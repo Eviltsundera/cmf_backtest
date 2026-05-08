@@ -445,14 +445,18 @@ Reporting layer читает эти artifacts без дополнительно�
 
 ```bash
 streamlit run scripts/python/dashboard.py -- --reports-dir reports/
-python scripts/python/export_static.py --run reports/avellaneda_stoikov
+streamlit run scripts/python/dashboard.py -- --reports-dir data/sample_reports
+python scripts/python/export_static.py --run data/sample_reports/avellaneda_stoikov
 ```
 
 `dashboard.py` поддерживает single-run и compare-mode, overview metrics,
 equity/drawdown, inventory, quoting diagnostics, fills table,
 adverse-selection bars и sensitivity heatmaps для grid-run директорий.
 `export_static.py` пишет `summary.md` и `plots/*.png` в
-`reports/_static/<run>/`, чтобы submission можно было открыть без Streamlit.
+`reports/_static/<run>/` или рядом с указанным reports root, чтобы submission
+можно было открыть без Streamlit. Для clean-checkout demo в репозитории есть
+маленькие tracked fixtures в `data/sample_reports/`; полные generated outputs
+остаются в ignored `reports/`.
 
 `docs/data_audit.md` фиксирует схему данных, единицу timestamp, типы колонок,
 sample interval и решение по preprocessing. MVP читает CSV напрямую; binary

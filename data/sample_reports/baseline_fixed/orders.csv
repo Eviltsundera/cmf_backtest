@@ -1,0 +1,8 @@
+ts_ns,event_type,order_id,strategy_id,side,price_ticks,quantity_lots,remaining_lots,status,related_order_id,reason
+1722837600503323000,submitted,1,1,buy,68869,1,1,active,,
+1722837600503323000,submitted,2,1,sell,68872,1,1,active,,
+1722837600656855000,cancelled,1,1,buy,68869,1,0,cancelled,,
+1722837600656855000,cancelled,2,1,sell,68872,1,0,cancelled,,
+1722837600656855000,submitted,3,1,buy,68869,1,1,active,,
+1722837600656855000,submitted,4,1,sell,68872,1,1,active,,
+1722837600681617000,filled,3,1,buy,68869,1,0,filled,,

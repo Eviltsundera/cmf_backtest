@@ -70,13 +70,13 @@ Python reporting utilities are available from the repository root under
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-streamlit run scripts/python/dashboard.py -- --reports-dir lob_backtester/artifacts/runs
+streamlit run scripts/python/dashboard.py -- --reports-dir data/sample_reports
 ```
 
 Static Markdown/PNG export for one run:
 
 ```bash
-python scripts/python/export_static.py --run lob_backtester/artifacts/runs/avellaneda_stoikov
+python scripts/python/export_static.py --run data/sample_reports/avellaneda_stoikov
 ```
 
 ## Documentation

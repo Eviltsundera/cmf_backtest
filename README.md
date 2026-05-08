@@ -145,10 +145,10 @@ Run the dashboard against generated reports:
 streamlit run scripts/python/dashboard.py -- --reports-dir reports/
 ```
 
-For the committed sample artifacts, use:
+For tracked sample report fixtures that work on a clean checkout, use:
 
 ```bash
-streamlit run scripts/python/dashboard.py -- --reports-dir lob_backtester/artifacts/runs
+streamlit run scripts/python/dashboard.py -- --reports-dir data/sample_reports
 ```
 
 ![Dashboard overview](docs/assets/dashboard_overview.svg)
@@ -156,7 +156,18 @@ streamlit run scripts/python/dashboard.py -- --reports-dir lob_backtester/artifa
 Export a static submission report without Streamlit:
 
 ```bash
-python scripts/python/export_static.py --run lob_backtester/artifacts/runs/avellaneda_stoikov
+python scripts/python/export_static.py --run data/sample_reports/avellaneda_stoikov
+```
+
+Generate fresh sample run artifacts into ignored `reports/` directories:
+
+```bash
+./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml \
+  --override run.output_dir=reports/baseline_fixed
+./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml \
+  --override run.output_dir=reports/avellaneda_stoikov
+./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml \
+  --override run.output_dir=reports/microprice_as
 ```
 
 ## Data

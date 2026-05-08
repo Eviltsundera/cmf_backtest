@@ -1,0 +1,16 @@
+{
+  "config_hash": "sample-microprice-as",
+  "git_commit": "sample-fixture",
+  "timestamp_utc": "2026-05-08T00:00:00Z",
+  "config_path": "lob_backtester/configs/microprice_as.yaml",
+  "overrides": [
+    {
+      "key": "strategy.gamma",
+      "value": "0.01"
+    },
+    {
+      "key": "strategy.microprice_beta",
+      "value": "0.5"
+    }
+  ]
+}
