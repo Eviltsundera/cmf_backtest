@@ -227,9 +227,11 @@ CSV-exporter отложен до появления engine loop / артефак
 
 ---
 
-## T5. OMS (OrderManager): жизненный цикл собственных ордеров
+## T5. OMS (OrderManager): жизненный цикл собственных ордеров [done]
 
 **Цель:** принимать `OrderIntent` от стратегии и трансформировать в активные ордера, обрабатывать cancel/replace, fill.
+
+**Статус:** done 2026-05-08.
 
 **Подзадачи:**
 - Типы:
@@ -242,12 +244,20 @@ CSV-exporter отложен до появления engine loop / артефак
 - Логи: `orders.csv` с полным жизненным циклом.
 
 **DoD:**
-- [ ] Юнит-тесты:
+- [x] Юнит-тесты:
   - submit добавляет ордер, status=ACTIVE;
   - cancel переводит в CANCELLED;
   - rejected при нарушении risk gate (превышение max_inventory);
   - replace = cancel + submit, новый id.
-- [ ] Тест: после fill ордер уходит из active store, статус FILLED.
+- [x] Тест: после fill ордер уходит из active store, статус FILLED.
+
+**Итог:** добавлен `lob::execution::OrderManager` с типами `Order`,
+`OrderIntent`, `OrderStatus`, lifecycle event log и active-order store. OMS
+поддерживает submit/cancel/cancel_all/replace/fill, сохраняет историю статусов
+после удаления из active set и пишет `orders.csv`. Risk gates покрывают
+`max_inventory`, `min_qty`, tick alignment и `strict_maker` against current
+top-of-book. Fill logic пока только lifecycle transition; условия исполнения
+остаются задачей T6.
 
 ---
 

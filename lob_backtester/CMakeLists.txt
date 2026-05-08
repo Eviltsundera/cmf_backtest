@@ -56,6 +56,7 @@ add_library(
   lob_core STATIC
   src/lob/book/OrderBook.cpp
   src/lob/data/CsvDataSource.cpp
+  src/lob/execution/OrderManager.cpp
   src/lob/features/FeatureEngine.cpp
   src/lob/utils/Config.cpp)
 add_library(lob::core ALIAS lob_core)
@@ -84,6 +85,7 @@ if(BUILD_TESTING)
     tests/config_smoke_test.cpp
     tests/data_source_test.cpp
     tests/feature_engine_test.cpp
+    tests/order_manager_test.cpp
     tests/order_book_test.cpp)
   target_link_libraries(lob_tests PRIVATE lob::core GTest::gtest_main)
   set(LOB_TEST_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/configs")

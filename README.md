@@ -18,11 +18,14 @@ Implemented:
   recovery policies.
 - Order-book feature functions for mid, spread, imbalance, weighted mid,
   microprice proxy, and rolling mid-return volatility.
+- OrderManager lifecycle for limit order submit/cancel/replace/fill, risk gates,
+  and `orders.csv` logging.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
-  k-way merge, sample replay, order-book invariants, and feature formulas.
+  k-way merge, sample replay, order-book invariants, feature formulas, and OMS
+  lifecycle rules.
 
-Next planned task: T5, `OrderManager` lifecycle.
+Next planned task: T6, fill simulation.
 
 ## Repository Layout
 
