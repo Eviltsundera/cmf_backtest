@@ -1,6 +1,7 @@
 #include "lob/execution/FillModel.hpp"
 
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -120,8 +121,22 @@ TEST(FillModelTest, SupportsBestQuoteMidPriceFeesAndConfigValidation) {
   EXPECT_EQ(fill->liquidity_role, lob::execution::LiquidityRole::Taker);
   EXPECT_NEAR(fill->fee, 0.2, 1e-12);
 
-  mid_config.taker_bps = -1.0;
+  mid_config.taker_bps = std::numeric_limits<double>::infinity();
   EXPECT_THROW(static_cast<void>(lob::execution::FillModel{mid_config}), std::runtime_error);
+}
+
+TEST(FillModelTest, AllowsMakerRebatesAsNegativeFees) {
+  lob::execution::OrderManager orders;
+  const auto &buy = orders.submit_limit(1, lob::execution::OrderSide::Buy, 100, 2, 1000);
+
+  auto config = trade_price_config();
+  config.maker_bps = -2.5;
+  const auto fill =
+      lob::execution::FillModel(config).check_fill(buy, trade_event(1100, 99), make_book());
+
+  ASSERT_TRUE(fill.has_value());
+  EXPECT_EQ(fill->liquidity_role, lob::execution::LiquidityRole::Maker);
+  EXPECT_NEAR(fill->fee, -0.05, 1e-12);
 }
 
 TEST(FillModelIntegrationTest, ActiveOrdersFillOnTradesAndRoundTripPnlIsExactWithZeroFees) {

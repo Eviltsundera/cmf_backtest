@@ -20,8 +20,8 @@ double bps_to_rate(const double bps) {
 } // namespace
 
 FillModel::FillModel(FillModelConfig config) : config_(config) {
-  if (config_.maker_bps < 0.0 || config_.taker_bps < 0.0) {
-    throw std::runtime_error("FillModel fees must be non-negative");
+  if (!std::isfinite(config_.maker_bps) || !std::isfinite(config_.taker_bps)) {
+    throw std::runtime_error("FillModel fees must be finite");
   }
   if (config_.latency_ns < 0) {
     throw std::runtime_error("FillModel latency_ns must be non-negative");
