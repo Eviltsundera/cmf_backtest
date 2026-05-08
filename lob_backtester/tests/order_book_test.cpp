@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <iostream>
 #include <random>
+#include <stdexcept>
 
 #include <gtest/gtest.h>
 
@@ -76,6 +77,18 @@ TEST(OrderBookTest, ApplySnapshotClearsOldLevelsAndRespectsMaxDepth) {
   EXPECT_FALSE(book.level(lob::data::BookSide::Ask, 1).has_value());
 }
 
+TEST(OrderBookTest, ApplySnapshotRejectsNegativeQuantities) {
+  lob::book::OrderBook book(config_with_depth(10));
+  auto snapshot = make_snapshot();
+
+  snapshot.asks[0].quantity_lots = -1;
+  EXPECT_THROW(book.apply_snapshot(snapshot), std::runtime_error);
+
+  snapshot = make_snapshot();
+  snapshot.bids[0].quantity_lots = -1;
+  EXPECT_THROW(book.apply_snapshot(snapshot), std::runtime_error);
+}
+
 TEST(OrderBookTest, ApplyUpdateAddsUpdatesAndDeletesLevels) {
   lob::book::OrderBook book(config_with_depth(10));
 
@@ -122,6 +135,26 @@ TEST(OrderBookTest, RecoveryDropsCrossingUpdatedLevels) {
   book.apply_update(lob::data::BookSide::Ask, 98, 5);
   expect_not_crossed(book);
   ASSERT_TRUE(book.best_ask().has_value());
+  EXPECT_EQ(book.best_ask()->price_ticks, 100);
+}
+
+TEST(OrderBookTest, RecoveryPreservesValidDepthBeforeTrimming) {
+  lob::book::OrderBook book(config_with_depth(1));
+  book.apply_update(lob::data::BookSide::Bid, 99, 3);
+  book.apply_update(lob::data::BookSide::Ask, 100, 4);
+
+  book.apply_update(lob::data::BookSide::Bid, 101, 5);
+  expect_not_crossed(book);
+  ASSERT_TRUE(book.best_bid().has_value());
+  ASSERT_TRUE(book.best_ask().has_value());
+  EXPECT_EQ(book.best_bid()->price_ticks, 99);
+  EXPECT_EQ(book.best_ask()->price_ticks, 100);
+
+  book.apply_update(lob::data::BookSide::Ask, 98, 5);
+  expect_not_crossed(book);
+  ASSERT_TRUE(book.best_bid().has_value());
+  ASSERT_TRUE(book.best_ask().has_value());
+  EXPECT_EQ(book.best_bid()->price_ticks, 99);
   EXPECT_EQ(book.best_ask()->price_ticks, 100);
 }
 

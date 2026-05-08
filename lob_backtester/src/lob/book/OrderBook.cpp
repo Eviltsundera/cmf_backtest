@@ -51,20 +51,23 @@ void OrderBook::apply_snapshot(const data::SnapshotPayload &snapshot) {
       std::min<std::size_t>(snapshot.depth, static_cast<std::size_t>(data::kSnapshotDepth));
   for (std::size_t index = 0; index < depth; ++index) {
     const data::PriceLevel &ask = snapshot.asks[index];
+    if (ask.quantity_lots < 0) {
+      throw std::runtime_error("OrderBook snapshot ask quantity must be non-negative");
+    }
     if (ask.quantity_lots > 0) {
       validate_level(ask.price_ticks, ask.quantity_lots);
       next_asks[ask.price_ticks] = ask.quantity_lots;
     }
 
     const data::PriceLevel &bid = snapshot.bids[index];
+    if (bid.quantity_lots < 0) {
+      throw std::runtime_error("OrderBook snapshot bid quantity must be non-negative");
+    }
     if (bid.quantity_lots > 0) {
       validate_level(bid.price_ticks, bid.quantity_lots);
       next_bids[bid.price_ticks] = bid.quantity_lots;
     }
   }
-
-  trim_levels(next_bids, config_.max_depth);
-  trim_levels(next_asks, config_.max_depth);
 
   if (config_.crossed_book_policy == CrossedBookPolicy::Reject &&
       crossed_or_locked(next_bids, next_asks)) {
@@ -73,8 +76,9 @@ void OrderBook::apply_snapshot(const data::SnapshotPayload &snapshot) {
 
   bids_ = std::move(next_bids);
   asks_ = std::move(next_asks);
-  ++snapshot_id_;
   enforce_crossed_policy(std::nullopt);
+  trim_to_max_depth();
+  ++snapshot_id_;
 }
 
 void OrderBook::apply_update(const data::BookSide side, const Price price_ticks,
@@ -103,6 +107,7 @@ void OrderBook::apply_update(const data::BookSide side, const Price price_ticks,
 
   try {
     enforce_crossed_policy(side);
+    trim_to_max_depth();
   } catch (...) {
     if (previous_bids && previous_asks) {
       bids_ = std::move(*previous_bids);
@@ -216,8 +221,6 @@ void OrderBook::set_level(const data::BookSide side, const Price price_ticks,
   } else {
     asks_[price_ticks] = quantity_lots;
   }
-
-  trim_to_max_depth();
 }
 
 void OrderBook::restore_level(const data::BookSide side, const Price price_ticks,
