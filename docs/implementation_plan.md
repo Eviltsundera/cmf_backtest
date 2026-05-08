@@ -299,6 +299,8 @@ conservative `fill_price = limit_price`, maker/taker fees и latency noop field.
 
 **Цель:** учёт капитала, расчёт PnL/inventory/turnover и market-making метрик.
 
+**Статус:** done 2026-05-08.
+
 **Подзадачи:**
 - `Portfolio`: cash, position, methods `apply_fill`, `equity(mark_price)`, `realized_pnl`, `unrealized_pnl`.
 - `MetricsEngine` агрегирует по run'у:
@@ -307,10 +309,21 @@ conservative `fill_price = limit_price`, maker/taker fees и latency noop field.
 - Вывод: `metrics.json`, `equity_curve.csv`, `inventory.csv`.
 
 **DoD:**
-- [ ] Юнит-тесты на accounting: buy/sell, fees, mark-to-market.
-- [ ] Sanity: no-trading run → PnL=0, turnover=0.
-- [ ] Sanity: при `fees=0` и развороте по spread `pnl = spread * qty`.
-- [ ] `metrics.json` содержит все поля из спецификации.
+- [x] Юнит-тесты на accounting: buy/sell, fees, mark-to-market.
+- [x] Sanity: no-trading run → PnL=0, turnover=0.
+- [x] Sanity: при `fees=0` и развороте по spread `pnl = spread * qty`.
+- [x] `metrics.json` содержит все поля из спецификации.
+
+**Итог:** добавлены `lob::portfolio::Portfolio` и
+`lob::metrics::MetricsEngine`. Portfolio применяет fills, ведет cash,
+signed position, average entry, realized/unrealized PnL и mark-to-market
+equity. MetricsEngine агрегирует final PnL, inventory stats, turnover,
+fill count/rate, max drawdown, quoted spread, spread captured,
+adverse-selection markouts by horizon и quote uptime. Выводятся
+`metrics.json`, `equity_curve.csv`, `inventory.csv`.
+
+Проверено: `cmake --build build -j2`, `ctest --test-dir build --output-on-failure`
+(51/51), `clang-format --dry-run --Werror`, `git diff --check`.
 
 ---
 

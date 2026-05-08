@@ -22,12 +22,16 @@ Implemented:
   and `orders.csv` logging.
 - FillModel for trade-price, best-quote, and mid-price execution checks with
   maker/taker fee accounting.
+- Portfolio accounting for cash, signed inventory, realized/unrealized PnL, and
+  mark-to-market equity.
+- MetricsEngine for PnL, inventory, turnover, fill-rate, drawdown,
+  market-making metrics, and `metrics.json`/CSV outputs.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
-  k-way merge, sample replay, order-book invariants, feature formulas, and OMS
-  lifecycle/fill rules.
+  k-way merge, sample replay, order-book invariants, feature formulas, OMS
+  lifecycle/fill rules, portfolio accounting, and run metrics.
 
-Next planned task: T7, portfolio accounting and metrics.
+Next planned task: T8, engine event loop and integration.
 
 ## Repository Layout
 

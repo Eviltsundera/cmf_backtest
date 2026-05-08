@@ -65,7 +65,8 @@ find lob_backtester/apps lob_backtester/src lob_backtester/tests -name '*.cpp' -
 ## Текущее состояние
 
 T0 bootstrap, T1 data audit, T2 DataLoader, T3 LOBBuilder, T4 FeatureEngine,
-T5 OMS и T6 FillModel закрыты. Сейчас в репозитории есть:
+T5 OMS, T6 FillModel и T7 Portfolio/MetricsEngine закрыты. Сейчас в
+репозитории есть:
 
 - CMake project с `lob_core`, `lob_backtest` и `lob_tests`.
 - YAML config loader в `lob::utils`.
@@ -73,10 +74,13 @@ T5 OMS и T6 FillModel закрыты. Сейчас в репозитории е
 - Market-By-Price `OrderBook` в `lob::book`.
 - Stateless order-book features и rolling volatility в `lob::features`.
 - OrderManager lifecycle/risk gates и FillModel в `lob::execution`.
+- Portfolio accounting в `lob::portfolio`.
+- MetricsEngine и вывод `metrics.json`, `equity_curve.csv`, `inventory.csv` в
+  `lob::metrics`.
 - CLI smoke path: `lob_backtest --config <yaml>`.
 - Example config, config smoke test и DataLoader tests.
 - `docs/data_audit.md` со схемой `MD.zip`.
 - `lob_backtester/scripts/python/audit.py` для аудита raw CSV и регенерации
   `data/sample/`.
 
-Следующая задача по плану: T7, Portfolio и MetricsEngine.
+Следующая задача по плану: T8, Engine event loop и интеграция.

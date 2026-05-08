@@ -1,6 +1,6 @@
 # Техническая документация: LOB Backtester
 
-**Статус:** draft, синхронизирован с T2 DataLoader.
+**Статус:** draft, синхронизирован с T7 Portfolio + MetricsEngine.
 
 Документ описывает целевую архитектуру CMF LOB backtesting engine и то, что уже
 есть в репозитории. Детальный task tracker остается в
@@ -25,7 +25,7 @@ latency и partial fills считаются расширениями, если �
 
 ## 2. Текущая реализация
 
-Сейчас кодовая база находится на уровне T2 DataLoader:
+Сейчас кодовая база находится на уровне T7 Portfolio + MetricsEngine:
 
 - `lob_backtester/CMakeLists.txt` определяет `lob_core`, `lob_backtest` и
   `lob_tests`.
@@ -37,15 +37,27 @@ latency и partial fills считаются расширениями, если �
   счетчики событий для replay/integration checks.
 - `lob_backtester/src/lob/data/CsvDataSource.hpp` и `.cpp` реализуют streaming
   CSV loader с merge по `(ts_ns, seq)`.
+- `lob_backtester/src/lob/book/OrderBook.hpp` и `.cpp` реализуют
+  Market-By-Price книгу с snapshots, depth updates и recovery для crossed book.
+- `lob_backtester/src/lob/features/FeatureEngine.hpp` и `.cpp` считают
+  top-of-book features и rolling volatility.
+- `lob_backtester/src/lob/execution/OrderManager.hpp` и `.cpp` реализуют
+  lifecycle собственных limit orders, risk gates и `orders.csv`.
+- `lob_backtester/src/lob/execution/FillModel.hpp` и `.cpp` реализуют
+  directional fill checks, maker/taker fees и active-order fill pass.
+- `lob_backtester/src/lob/portfolio/Portfolio.hpp` и `.cpp` ведут cash,
+  signed inventory, realized/unrealized PnL и mark-to-market equity.
+- `lob_backtester/src/lob/metrics/MetricsEngine.hpp` и `.cpp` агрегируют
+  run metrics и пишут `metrics.json`, `equity_curve.csv`, `inventory.csv`.
 - `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, загружает YAML,
   логирует путь, печатает разобранные параметры и завершает работу.
 - `lob_backtester/configs/example.yaml` содержит smoke config, согласованный с
   `docs/data_audit.md`.
-- `lob_backtester/tests/config_smoke_test.cpp` и
-  `lob_backtester/tests/data_source_test.cpp` проверяют config и DataLoader.
+- `lob_backtester/tests/*_test.cpp` покрывают config, DataLoader, order book,
+  features, OMS, fill model, portfolio accounting и metrics aggregation.
 
-Текущий CLI намеренно остается smoke path. Order book, execution simulator,
-portfolio, metrics и strategies еще не реализованы.
+Текущий CLI намеренно остается smoke path. Склейка event loop, strategies и
+полноценные run artifacts подключаются в следующих задачах.
 
 ## 3. Архитектура верхнего уровня
 
@@ -160,11 +172,12 @@ MVP rule:
 
 Отслеживает cash, position, realized/unrealized PnL и fees.
 
-Целевая ответственность:
+Текущая ответственность:
 
 - детерминированно применять fills;
 - считать mark-to-market equity по текущему market state;
 - отдавать inventory и cash для strategy risk limits и metrics.
+- поддерживать long, short и reversal accounting через average entry price.
 
 ### MetricsEngine
 
@@ -178,8 +191,8 @@ MVP rule:
 - quoted spread и spread captured;
 - adverse-selection metrics на заданных горизонтах.
 
-Планируемые artifacts: `metrics.json`, `equity_curve.csv`, `inventory.csv`,
-`orders.csv`, `fills.csv`.
+Текущие artifacts: `metrics.json`, `equity_curve.csv`, `inventory.csv`.
+`orders.csv` уже пишет OrderManager; `fills.csv` будет подключен в engine loop.
 
 ## 5. Конфигурация
 
@@ -334,10 +347,10 @@ data используется для integration и throughput checks после
 
 Ближайшие задачи:
 
-1. T3: реализовать Market-By-Price order book.
-2. T4: реализовать order-book features и rolling volatility.
-3. T5-T8: добавить OMS, fills, portfolio, metrics и event loop.
-4. T9-T14: стратегии, конфиги, dashboard и финальные эксперименты.
+1. T8: склеить DataLoader, OrderBook, FeatureEngine, OMS, FillModel, Portfolio
+   и MetricsEngine в event loop.
+2. T9-T10: добавить fixed-spread baseline и Avellaneda-Stoikov strategy.
+3. T11-T14: конфиги, dashboard, эксперименты, отчет и финальная полировка.
 
 Финальные deliverables:
 

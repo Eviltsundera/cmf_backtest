@@ -38,6 +38,9 @@ directly:
 The current CLI is a bootstrap smoke path: it parses the YAML file, logs that the
 configuration was loaded, prints the resolved parameters, and exits with status 0.
 
+Implemented engine modules currently include DataLoader, Market-By-Price
+OrderBook, FeatureEngine, OrderManager, FillModel, Portfolio, and MetricsEngine.
+
 ## Documentation
 
 - [Implementation plan](../docs/implementation_plan.md)
