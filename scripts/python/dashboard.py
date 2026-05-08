@@ -91,6 +91,13 @@ def main() -> None:
             st.caption(f"Selected runs: {len(selected_labels)}")
 
         normalize_equity = st.checkbox("Normalize equity at first sample", value=False)
+        max_chart_points = st.slider(
+            "Chart points per run",
+            min_value=500,
+            max_value=20000,
+            value=reporting.DEFAULT_MAX_CHART_POINTS_PER_TRACE,
+            step=500,
+        )
 
     if not selected_labels:
         st.warning("Select at least one run.")
@@ -127,9 +134,9 @@ def main() -> None:
     with tabs[0]:
         render_overview(runs, reports_dir)
     with tabs[1]:
-        render_equity(runs, normalize_equity)
+        render_equity(runs, normalize_equity, max_chart_points)
     with tabs[2]:
-        render_inventory(runs)
+        render_inventory(runs, max_chart_points)
     with tabs[3]:
         render_quoting(runs)
     with tabs[4]:
@@ -163,15 +170,36 @@ def render_overview(runs: list[reporting.RunArtifacts], reports_dir: Path) -> No
                 st.success(f"Exported to `{output_dir}`")
 
 
-def render_equity(runs: list[reporting.RunArtifacts], normalize: bool) -> None:
-    st.plotly_chart(reporting.equity_figure(runs, normalize=normalize), width="stretch")
-    st.plotly_chart(reporting.drawdown_figure(runs, normalize=normalize), width="stretch")
+def render_equity(
+    runs: list[reporting.RunArtifacts],
+    normalize: bool,
+    max_chart_points: int,
+) -> None:
+    st.plotly_chart(
+        reporting.equity_figure(
+            runs,
+            normalize=normalize,
+            max_points_per_trace=max_chart_points,
+        ),
+        width="stretch",
+    )
+    st.plotly_chart(
+        reporting.drawdown_figure(
+            runs,
+            normalize=normalize,
+            max_points_per_trace=max_chart_points,
+        ),
+        width="stretch",
+    )
 
 
-def render_inventory(runs: list[reporting.RunArtifacts]) -> None:
+def render_inventory(runs: list[reporting.RunArtifacts], max_chart_points: int) -> None:
     left, right = st.columns(2)
     with left:
-        st.plotly_chart(reporting.inventory_figure(runs), width="stretch")
+        st.plotly_chart(
+            reporting.inventory_figure(runs, max_points_per_trace=max_chart_points),
+            width="stretch",
+        )
     with right:
         st.plotly_chart(reporting.inventory_histogram(runs), width="stretch")
 

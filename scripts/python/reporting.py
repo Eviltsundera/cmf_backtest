@@ -16,6 +16,7 @@ import plotly.graph_objects as go
 
 DEFAULT_REPORTS_DIR = Path("reports")
 FALLBACK_REPORTS_DIR = Path("data/sample_reports")
+DEFAULT_MAX_CHART_POINTS_PER_TRACE = 3000
 
 METRIC_ORDER = [
     "final_pnl",
@@ -231,41 +232,82 @@ def style_metric_table(frame: pd.DataFrame) -> pd.io.formats.style.Styler:
     return frame.style.format(precision=6).apply(highlight, axis=1)
 
 
-def equity_figure(runs: Iterable[RunArtifacts], *, normalize: bool = False) -> go.Figure:
+def downsample_xy(
+    frame: pd.DataFrame,
+    y: pd.Series,
+    *,
+    max_points: int | None = DEFAULT_MAX_CHART_POINTS_PER_TRACE,
+) -> tuple[pd.Series, pd.Series]:
+    if frame.empty or "timestamp" not in frame.columns:
+        return pd.Series(dtype="datetime64[ns, UTC]"), pd.Series(dtype="float64")
+    if max_points is None or max_points <= 0 or len(frame) <= max_points:
+        return frame["timestamp"], y
+
+    stride = max(1, math.ceil(len(frame) / max_points))
+    sampled_frame = frame.iloc[::stride]
+    sampled_y = y.iloc[::stride]
+    if sampled_frame.index[-1] != frame.index[-1]:
+        sampled_frame = pd.concat([sampled_frame, frame.iloc[[-1]]])
+        sampled_y = pd.concat([sampled_y, y.iloc[[-1]]])
+    return sampled_frame["timestamp"], sampled_y
+
+
+def equity_figure(
+    runs: Iterable[RunArtifacts],
+    *,
+    normalize: bool = False,
+    max_points_per_trace: int | None = DEFAULT_MAX_CHART_POINTS_PER_TRACE,
+) -> go.Figure:
     fig = go.Figure()
     for run in runs:
         frame = run.equity
-        if frame.empty or "equity" not in frame.columns:
+        if frame.empty or "equity" not in frame.columns or "timestamp" not in frame.columns:
             continue
         y = frame["equity"].astype(float)
         if normalize and not y.empty:
             y = y - y.iloc[0]
-        fig.add_trace(go.Scatter(x=frame["timestamp"], y=y, mode="lines", name=run.name))
+        x_sampled, y_sampled = downsample_xy(frame, y, max_points=max_points_per_trace)
+        fig.add_trace(go.Scattergl(x=x_sampled, y=y_sampled, mode="lines", name=run.name))
     return prepare_figure(fig, "Equity", "time", "equity")
 
 
-def drawdown_figure(runs: Iterable[RunArtifacts], *, normalize: bool = False) -> go.Figure:
+def drawdown_figure(
+    runs: Iterable[RunArtifacts],
+    *,
+    normalize: bool = False,
+    max_points_per_trace: int | None = DEFAULT_MAX_CHART_POINTS_PER_TRACE,
+) -> go.Figure:
     fig = go.Figure()
     for run in runs:
         frame = run.equity
-        if frame.empty or "equity" not in frame.columns:
+        if frame.empty or "equity" not in frame.columns or "timestamp" not in frame.columns:
             continue
         equity = frame["equity"].astype(float)
         if normalize and not equity.empty:
             equity = equity - equity.iloc[0]
         drawdown = equity - equity.cummax()
-        fig.add_trace(go.Scatter(x=frame["timestamp"], y=drawdown, mode="lines", name=run.name))
+        x_sampled, y_sampled = downsample_xy(frame, drawdown, max_points=max_points_per_trace)
+        fig.add_trace(go.Scattergl(x=x_sampled, y=y_sampled, mode="lines", name=run.name))
     return prepare_figure(fig, "Drawdown", "time", "drawdown")
 
 
-def inventory_figure(runs: Iterable[RunArtifacts]) -> go.Figure:
+def inventory_figure(
+    runs: Iterable[RunArtifacts],
+    *,
+    max_points_per_trace: int | None = DEFAULT_MAX_CHART_POINTS_PER_TRACE,
+) -> go.Figure:
     fig = go.Figure()
     for run in runs:
         frame = run.inventory
-        if frame.empty or "position_lots" not in frame.columns:
+        if frame.empty or "position_lots" not in frame.columns or "timestamp" not in frame.columns:
             continue
+        x_sampled, y_sampled = downsample_xy(
+            frame,
+            frame["position_lots"],
+            max_points=max_points_per_trace,
+        )
         fig.add_trace(
-            go.Scatter(x=frame["timestamp"], y=frame["position_lots"], mode="lines", name=run.name)
+            go.Scattergl(x=x_sampled, y=y_sampled, mode="lines", name=run.name)
         )
         observed_limit = run.metrics.get("max_inventory")
         if isinstance(observed_limit, (int, float)) and observed_limit > 0:
