@@ -51,8 +51,8 @@ find lob_backtester/apps lob_backtester/src lob_backtester/tests -name '*.cpp' -
 ## Правила разработки
 
 - Сохраняй текущую C++20/CMake структуру.
-- Держи небольшие доменные модули в `src/lob/{data,book,execution,portfolio,
-  strategies,engine,metrics,utils}`.
+- Держи небольшие доменные модули в `src/lob/{data,book,features,execution,
+  portfolio,strategies,engine,metrics,utils}`.
 - Engine должен оставаться event-driven: market event, book update, fills,
   strategy, order management, portfolio, metrics.
 - Не допускай look-ahead bias: стратегия видит только состояние, полученное из
@@ -64,17 +64,18 @@ find lob_backtester/apps lob_backtester/src lob_backtester/tests -name '*.cpp' -
 
 ## Текущее состояние
 
-T0 bootstrap, T1 data audit, T2 DataLoader и T3 LOBBuilder закрыты. Сейчас в
-репозитории есть:
+T0 bootstrap, T1 data audit, T2 DataLoader, T3 LOBBuilder и T4 FeatureEngine
+закрыты. Сейчас в репозитории есть:
 
 - CMake project с `lob_core`, `lob_backtest` и `lob_tests`.
 - YAML config loader в `lob::utils`.
 - Streaming CSV DataLoader в `lob::data`.
 - Market-By-Price `OrderBook` в `lob::book`.
+- Stateless order-book features и rolling volatility в `lob::features`.
 - CLI smoke path: `lob_backtest --config <yaml>`.
 - Example config, config smoke test и DataLoader tests.
 - `docs/data_audit.md` со схемой `MD.zip`.
 - `lob_backtester/scripts/python/audit.py` для аудита raw CSV и регенерации
   `data/sample/`.
 
-Следующая задача по плану: T4, FeatureEngine и order-book признаки.
+Следующая задача по плану: T5, OMS и lifecycle собственных ордеров.

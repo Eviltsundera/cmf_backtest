@@ -16,11 +16,13 @@ Implemented:
 - Normalized `MarketEvent` stream ordered by `(ts_ns, seq)`.
 - Market-By-Price `OrderBook` with snapshot/update replay and crossed-book
   recovery policies.
+- Order-book feature functions for mid, spread, imbalance, weighted mid,
+  microprice proxy, and rolling mid-return volatility.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
-  k-way merge, sample replay, and order-book invariants.
+  k-way merge, sample replay, order-book invariants, and feature formulas.
 
-Next planned task: T4, order-book `FeatureEngine`.
+Next planned task: T5, `OrderManager` lifecycle.
 
 ## Repository Layout
 

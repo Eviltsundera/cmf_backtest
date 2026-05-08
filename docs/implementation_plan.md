@@ -197,9 +197,11 @@ Release benchmark на локальной сборке: `18,895,363 apply_update
 
 ---
 
-## T4. FeatureEngine: order-book признаки
+## T4. FeatureEngine: order-book признаки [done]
 
 **Цель:** считать `mid`, `spread`, `imbalance`, `weighted_mid`, microprice proxy — отдельно от стратегии для переиспользования.
+
+**Статус:** done 2026-05-08.
 
 **Подзадачи:**
 - Stateless функции над `OrderBook`:
@@ -212,9 +214,16 @@ Release benchmark на локальной сборке: `18,895,363 apply_update
 - Опциональный экспортер `book_features.csv` для sanity check / Python-аналитики.
 
 **DoD:**
-- [ ] Юнит-тесты на каждую функцию (включая edge cases: одна сторона пуста, нулевые объёмы).
-- [ ] Тест на rolling σ: на синтетических данных совпадает с numpy std в пределах 1e-9.
-- [ ] При `alpha=0` microprice_proxy ≡ mid; при `alpha=1, V_b=V_a` ≡ mid.
+- [x] Юнит-тесты на каждую функцию (включая edge cases: одна сторона пуста, нулевые объёмы).
+- [x] Тест на rolling σ: на синтетических данных совпадает с numpy std в пределах 1e-9.
+- [x] При `alpha=0` microprice_proxy ≡ mid; при `alpha=1, V_b=V_a` ≡ mid.
+
+**Итог:** добавлен модуль `lob::features` с stateless функциями `mid`,
+`spread`, `imbalance`, `weighted_mid`, `microprice_proxy`, generic
+`RollingStd` и `RollingMidReturnStd` для простой доходности mid-price.
+Feature functions возвращают `std::nullopt`, если top-of-book неполный; нулевой
+размер уровня в текущем `OrderBook` трактуется как удаление уровня. Опциональный
+CSV-exporter отложен до появления engine loop / артефактов sanity-check.
 
 ---
 
