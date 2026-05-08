@@ -2,6 +2,7 @@ run:
   symbol: MD
   input_path: data/sample
   output_dir: lob_backtester/artifacts/runs/avellaneda_stoikov
+  log_level: info
 
 market:
   tick_size: 0.0000001
@@ -9,6 +10,9 @@ market:
 
 book:
   max_depth: 50
+
+portfolio:
+  initial_cash: 0.0
 
 execution:
   fill_model: price_cross

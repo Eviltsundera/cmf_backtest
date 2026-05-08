@@ -36,12 +36,24 @@ directly:
 ```
 
 The CLI runs the configured CSV replay, prints a short run summary, and writes
-artifacts to `run.output_dir`. Strategy configs are:
+artifacts to `run.output_dir`. Each run writes `run_metadata.json` with the
+effective config hash, git commit, timestamp, config path, and applied
+overrides. Strategy configs are:
 
 ```bash
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
 ./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
 ./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml
+```
+
+Use repeated `--override key=value` flags to change the effective config after
+YAML loading, and `--json` for machine-readable summary output:
+
+```bash
+./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml \
+  --override strategy.gamma=0.05 \
+  --override run.output_dir=/tmp/cmf-as-gamma-005 \
+  --json
 ```
 
 Implemented engine modules currently include DataLoader, Market-By-Price

@@ -486,9 +486,20 @@ CLI sample run, полный `ctest`, `clang-format --dry-run --Werror`,
 - `output_dir/run_metadata.json`: hash конфига, git commit, timestamp.
 
 **DoD:**
-- [ ] Все 3 конфига валидны и запускаются на sample.
-- [ ] CLI override работает: `--override strategy.gamma=0.05` меняет параметр.
-- [ ] `run_metadata.json` создаётся в output dir и содержит config hash + commit.
+- [x] Все 3 конфига валидны и запускаются на sample.
+- [x] CLI override работает: `--override strategy.gamma=0.05` меняет параметр.
+- [x] `run_metadata.json` создаётся в output dir и содержит config hash + commit.
+
+**Итог:** CLI принимает repeated `--override key=value` и `--json`; overrides
+применяются к effective config после YAML loading, поддерживаются current-schema
+ключи и plan-style aliases (`data.*`, `engine.quote_refresh_ms`, `fees.*`,
+`portfolio.*`). `run.log_level` управляет spdlog level, `portfolio.initial_cash`
+прокидывается в engine, а `run_metadata.json` пишет `config_hash`,
+`git_commit`, `timestamp_utc`, `config_path` и список overrides. Все три sample
+configs прогнаны с output override в `/tmp`; добавлены tests для overrides,
+plan-style aliases, config hash и invalid override rejection. Verification:
+`cmake --build build -j2`, `ctest --test-dir build --output-on-failure`,
+3 sample CLI runs, `clang-format --dry-run --Werror`, `git diff --check`.
 
 ---
 

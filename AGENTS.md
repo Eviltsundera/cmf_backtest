@@ -66,12 +66,13 @@ find lob_backtester/apps lob_backtester/src lob_backtester/tests -name '*.cpp' -
 
 T0 bootstrap, T1 data audit, T2 DataLoader, T3 LOBBuilder, T4 FeatureEngine,
 T5 OMS, T6 FillModel, T7 Portfolio/MetricsEngine, T8 Engine integration, T9
-FixedSpreadStrategy, T10 AvellanedaStoikovStrategy и T11 Microprice extension
-закрыты. Сейчас в
+FixedSpreadStrategy, T10 AvellanedaStoikovStrategy, T11 Microprice extension и
+T12 CLI/config polish закрыты. Сейчас в
 репозитории есть:
 
 - CMake project с `lob_core`, `lob_backtest` и `lob_tests`.
-- YAML config loader в `lob::utils`.
+- YAML config loader в `lob::utils` с plan-style aliases, `--override`
+  support и stable effective config hash.
 - Streaming CSV DataLoader в `lob::data`.
 - Market-By-Price `OrderBook` в `lob::book`.
 - Stateless order-book features и rolling volatility в `lob::features`.
@@ -83,16 +84,17 @@ FixedSpreadStrategy, T10 AvellanedaStoikovStrategy и T11 Microprice extension
   `AvellanedaStoikovStrategy` с classic/microprice fair-price modes и
   `BacktestEngine` event loop в
   `lob::strategies`/`lob::engine`.
-- CLI replay path: `lob_backtest --config <yaml>` с `strategy.name: noop`,
-  `fixed_spread`, `avellaneda_stoikov` или `microprice_as`.
+- CLI replay path: `lob_backtest --config <yaml> [--override key=value ...]
+  [--json]` с `strategy.name: noop`, `fixed_spread`, `avellaneda_stoikov` или
+  `microprice_as`.
 - Baseline configs: `lob_backtester/configs/baseline_fixed_spread.yaml`,
   `lob_backtester/configs/avellaneda_stoikov.yaml`,
   `lob_backtester/configs/microprice_as.yaml`.
-- Run artifacts: `metrics.json`, `equity_curve.csv`, `inventory.csv`,
-  `orders.csv`, `fills.csv`.
+- Run artifacts: `run_metadata.json`, `metrics.json`, `equity_curve.csv`,
+  `inventory.csv`, `orders.csv`, `fills.csv`.
 - Example config, config smoke test и DataLoader tests.
 - `docs/data_audit.md` со схемой `MD.zip`.
 - `lob_backtester/scripts/python/audit.py` для аудита raw CSV и регенерации
   `data/sample/`.
 
-Следующая задача по плану: T12, CLI и конфигурация.
+Следующая задача по плану: T13, reporting layer.

@@ -38,6 +38,9 @@ Implemented:
   `fair_price_mode`, `microprice_alpha`, `microprice_beta`, formula tests,
   beta-zero equivalence coverage, YAML config, and sample artifact smoke
   coverage.
+- CLI/config polish with repeated `--override key=value`, `--json` summary
+  output, config-driven log level, plan-style YAML aliases, stable effective
+  config hash, and `run_metadata.json`.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
   k-way merge, sample replay, order-book invariants, feature formulas, OMS
@@ -45,7 +48,7 @@ Implemented:
   look-ahead protection, fixed-spread, Avellaneda-Stoikov, microprice A-S
   strategy behavior, and sample replay throughput.
 
-Next planned task: T12, CLI and configuration polish.
+Next planned task: T13, reporting dashboard.
 
 ## Repository Layout
 
@@ -104,12 +107,23 @@ and records loader and engine throughput.
 ```
 
 The CLI runs the configured CSV replay and writes run artifacts to
-`run.output_dir`. Strategy configs are available via:
+`run.output_dir`, including `run_metadata.json` with the effective config hash,
+git commit, timestamp, config path, and CLI overrides. Strategy configs are
+available via:
 
 ```bash
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
 ./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
 ./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml
+```
+
+Runtime overrides are applied after YAML loading:
+
+```bash
+./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml \
+  --override strategy.gamma=0.05 \
+  --override run.output_dir=/tmp/cmf-as-gamma-005 \
+  --json
 ```
 
 ## Data

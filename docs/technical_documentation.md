@@ -1,6 +1,6 @@
 # Техническая документация: LOB Backtester
 
-**Статус:** draft, синхронизирован с T11 Microprice extension.
+**Статус:** draft, синхронизирован с T12 CLI/config polish.
 
 Документ описывает целевую архитектуру CMF LOB backtesting engine и то, что уже
 есть в репозитории. Детальный task tracker остается в
@@ -25,12 +25,13 @@ latency и partial fills считаются расширениями, если �
 
 ## 2. Текущая реализация
 
-Сейчас кодовая база находится на уровне T11 Microprice extension:
+Сейчас кодовая база находится на уровне T12 CLI/config polish:
 
 - `lob_backtester/CMakeLists.txt` определяет `lob_core`, `lob_backtest` и
   `lob_tests`.
 - `lob_backtester/src/lob/utils/Config.hpp` и `.cpp` загружают YAML-конфиг в
-  типизированные структуры.
+  типизированные структуры, применяют CLI overrides и считают stable hash
+  эффективного конфига.
 - `lob_backtester/src/lob/data/MarketEvent.hpp` определяет нормализованный
   market-event contract.
 - `lob_backtester/src/lob/data/DataSource.hpp` определяет `IDataSource` и
@@ -55,8 +56,9 @@ latency и partial fills считаются расширениями, если �
   тестируемые A-S formula helpers.
 - `lob_backtester/src/lob/engine/BacktestEngine.hpp` и `.cpp` реализуют
   event loop, scheduler, strategy callbacks и `fills.csv`.
-- `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, загружает YAML,
-  запускает CSV replay с `strategy.name: noop`, `fixed_spread` или
+- `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, repeated
+  `--override key=value` и `--json`, загружает YAML, выставляет log level из
+  конфига, запускает CSV replay с `strategy.name: noop`, `fixed_spread` или
   `avellaneda_stoikov`/`microprice_as`, печатает summary и пишет artifacts в
   `run.output_dir`.
 - `lob_backtester/configs/example.yaml` содержит smoke config, согласованный с
@@ -230,8 +232,8 @@ MVP rule:
 - quoted spread и spread captured;
 - adverse-selection metrics на заданных горизонтах.
 
-Текущие artifacts: `metrics.json`, `equity_curve.csv`, `inventory.csv`,
-`orders.csv`, `fills.csv`.
+Текущие artifacts: `run_metadata.json`, `metrics.json`, `equity_curve.csv`,
+`inventory.csv`, `orders.csv`, `fills.csv`.
 
 ## 5. Конфигурация
 
@@ -244,6 +246,7 @@ run:
   symbol: BTCUSDT
   input_path: data/sample
   output_dir: lob_backtester/artifacts/runs/example
+  log_level: info
 
 market:
   tick_size: 0.01
@@ -251,6 +254,9 @@ market:
 
 book:
   max_depth: 50
+
+portfolio:
+  initial_cash: 0.0
 
 execution:
   fill_model: price_cross
@@ -276,16 +282,24 @@ strategy:
   quote_refresh_ms: 100
 ```
 
+Также loader принимает plan-style aliases из исходной спецификации: `data.path`,
+`data.tick_size`, `data.lot_size`, `data.max_depth`, `engine.quote_refresh_ms`,
+`fees.maker_bps`, `fees.taker_bps`, `portfolio.initial_cash` и
+`portfolio.max_inventory`. Значения из current schema имеют приоритет, если
+оба варианта присутствуют. CLI overrides применяются после YAML загрузки:
+`--override strategy.gamma=0.05`, `--override run.output_dir=/tmp/run` и т.д.
+`config_hash` считается по эффективному конфигу после overrides.
+
 Для fixed-spread baseline используется `strategy.name: fixed_spread`; CLI также
 поддерживает aliases `baseline_fixed` и `fixed`. Для классической модели
 используется `strategy.name: avellaneda_stoikov`; aliases: `avellaneda`, `as`.
 Для microprice extension используется `strategy.name: microprice_as`;
 поддерживаются aliases `microprice_avellaneda_stoikov` и `mp_as`, а
 `fair_price_mode` должен быть `microprice_proxy`.
-`quote_refresh_ms` остается engine scheduler параметром, а `max_inventory`
-дополнительно прокидывается в OMS risk gate. Будущие задачи расширят схему
-настройками DataLoader, strategy-specific секциями, reporting settings, CLI
-overrides и run metadata.
+`quote_refresh_ms` остается engine scheduler параметром, `initial_cash`
+передается в portfolio, а `max_inventory` дополнительно прокидывается в OMS
+risk gate. `run.log_level` поддерживает `trace`, `debug`, `info`, `warn`,
+`error`, `critical` и `off`.
 
 ## 6. Модели стратегий
 
@@ -375,6 +389,10 @@ ctest --test-dir build --output-on-failure
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
 ./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
 ./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml
+./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml \
+  --override strategy.gamma=0.05 \
+  --override run.output_dir=/tmp/cmf-as-gamma-005 \
+  --json
 ```
 
 Проверка форматирования:
@@ -418,6 +436,11 @@ artifacts/runs/<run_name>/
   inventory.csv
 ```
 
+`run_metadata.json` содержит `config_hash`, `git_commit`, `timestamp_utc`,
+`config_path` и список примененных overrides. `metrics.json` остается основным
+machine-readable output для метрик, а `--json` печатает краткое summary run'а в
+stdout.
+
 `docs/data_audit.md` фиксирует схему данных, единицу timestamp, типы колонок,
 sample interval и решение по preprocessing. MVP читает CSV напрямую; binary
 preprocessing откладывается до replay benchmark.
@@ -447,9 +470,7 @@ data используется для integration и throughput checks после
 
 Ближайшие задачи:
 
-1. T12: CLI/config polish.
-2. T13-T14: dashboard, эксперименты, отчет и финальная
-   полировка.
+1. T13-T14: dashboard, эксперименты, отчет и финальная полировка.
 
 Финальные deliverables:
 
