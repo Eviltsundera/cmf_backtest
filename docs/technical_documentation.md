@@ -441,6 +441,19 @@ artifacts/runs/<run_name>/
 machine-readable output для метрик, а `--json` печатает краткое summary run'а в
 stdout.
 
+Reporting layer читает эти artifacts без дополнительной C++ сборки:
+
+```bash
+streamlit run scripts/python/dashboard.py -- --reports-dir reports/
+python scripts/python/export_static.py --run reports/avellaneda_stoikov
+```
+
+`dashboard.py` поддерживает single-run и compare-mode, overview metrics,
+equity/drawdown, inventory, quoting diagnostics, fills table,
+adverse-selection bars и sensitivity heatmaps для grid-run директорий.
+`export_static.py` пишет `summary.md` и `plots/*.png` в
+`reports/_static/<run>/`, чтобы submission можно было открыть без Streamlit.
+
 `docs/data_audit.md` фиксирует схему данных, единицу timestamp, типы колонок,
 sample interval и решение по preprocessing. MVP читает CSV напрямую; binary
 preprocessing откладывается до replay benchmark.

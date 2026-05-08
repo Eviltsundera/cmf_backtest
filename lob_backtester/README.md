@@ -61,6 +61,24 @@ OrderBook, FeatureEngine, Strategy interface, OrderManager, FillModel,
 Portfolio, MetricsEngine, BacktestEngine, NoopStrategy, FixedSpreadStrategy,
 AvellanedaStoikovStrategy, and the microprice-adjusted A-S fair-price mode.
 
+## Viewing Results
+
+Python reporting utilities are available from the repository root under
+`scripts/python`.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run scripts/python/dashboard.py -- --reports-dir lob_backtester/artifacts/runs
+```
+
+Static Markdown/PNG export for one run:
+
+```bash
+python scripts/python/export_static.py --run lob_backtester/artifacts/runs/avellaneda_stoikov
+```
+
 ## Documentation
 
 - [Implementation plan](../docs/implementation_plan.md)

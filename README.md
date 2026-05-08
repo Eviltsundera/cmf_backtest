@@ -41,6 +41,8 @@ Implemented:
 - CLI/config polish with repeated `--override key=value`, `--json` summary
   output, config-driven log level, plan-style YAML aliases, stable effective
   config hash, and `run_metadata.json`.
+- Reporting layer with a Streamlit dashboard, multi-run comparison, sensitivity
+  heatmaps, and static Markdown/PNG export for submission artifacts.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
   k-way merge, sample replay, order-book invariants, feature formulas, OMS
@@ -48,7 +50,7 @@ Implemented:
   look-ahead protection, fixed-spread, Avellaneda-Stoikov, microprice A-S
   strategy behavior, and sample replay throughput.
 
-Next planned task: T13, reporting dashboard.
+Next planned task: T14, experiments and final report.
 
 ## Repository Layout
 
@@ -62,6 +64,7 @@ Next planned task: T13, reporting dashboard.
 |   |-- implementation_plan.md   # task tracker and DoD
 |   |-- data_audit.md            # raw data schema and sample audit
 |   `-- technical_documentation.md
+|-- scripts/python/              # dashboard and static report export
 `-- lob_backtester/
     |-- apps/                    # CLI entry points
     |-- configs/                 # YAML configs
@@ -124,6 +127,36 @@ Runtime overrides are applied after YAML loading:
   --override strategy.gamma=0.05 \
   --override run.output_dir=/tmp/cmf-as-gamma-005 \
   --json
+```
+
+## Viewing Results
+
+Install the Python reporting dependencies from the repository root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Run the dashboard against generated reports:
+
+```bash
+streamlit run scripts/python/dashboard.py -- --reports-dir reports/
+```
+
+For the committed sample artifacts, use:
+
+```bash
+streamlit run scripts/python/dashboard.py -- --reports-dir lob_backtester/artifacts/runs
+```
+
+![Dashboard overview](docs/assets/dashboard_overview.svg)
+
+Export a static submission report without Streamlit:
+
+```bash
+python scripts/python/export_static.py --run lob_backtester/artifacts/runs/avellaneda_stoikov
 ```
 
 ## Data

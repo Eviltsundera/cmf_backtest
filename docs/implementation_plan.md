@@ -503,9 +503,11 @@ plan-style aliases, config hash и invalid override rejection. Verification:
 
 ---
 
-## T13. Reporting layer (Streamlit dashboard)
+## T13. Reporting layer (Streamlit dashboard) [done]
 
 **Цель:** интерактивный дашборд для исследования run'ов глазами + текстовый экспорт для submission.
+
+**Статус:** done 2026-05-08.
 
 **Стек:** `streamlit` + `plotly` + `pandas`. Запуск: `streamlit run scripts/python/dashboard.py -- --reports-dir reports/`.
 
@@ -528,13 +530,21 @@ plan-style aliases, config hash и invalid override rejection. Verification:
 - **Cache:** `@st.cache_data` для чтения CSV — мгновенное переключение между tabs.
 - `requirements.txt` обновить: `streamlit>=1.32`, `plotly>=5.20`, `kaleido` (для static export), `pandas`, `pyarrow`.
 
+**Итог:** добавлены [scripts/python/dashboard.py](../scripts/python/dashboard.py),
+[scripts/python/export_static.py](../scripts/python/export_static.py) и общий
+reporting-модуль. Dashboard читает директории с `metrics.json`, поддерживает
+single/compare mode, time-window фильтр, equity/drawdown, inventory,
+quoting diagnostics, fills table, adverse-selection и sensitivity heatmap.
+Static export пишет `summary.md` и `plots/*.png`; `kaleido` зафиксирован на
+`<1`, чтобы не требовать отдельную установку Chrome.
+
 **DoD:**
-- [ ] `streamlit run scripts/python/dashboard.py -- --reports-dir reports/` поднимает дашборд на localhost; все 7 tabs рендерятся без ошибок на 1+ run'е.
-- [ ] Compare-mode корректно работает на 3+ run'ах: метрики side-by-side, overlay equity curves.
-- [ ] Sensitivity tab корректно показывает heatmap при наличии grid-run'ов (например `reports/grid_gamma_beta/run_*/`).
-- [ ] `python scripts/python/export_static.py --run reports/avellaneda_stoikov/` создаёт `summary.md` + `plots/*.png` без запуска Streamlit (для submission).
-- [ ] README содержит секцию «Viewing results» с командой запуска и скриншотом дашборда.
-- [ ] Дашборд работает на чистой машине после `pip install -r requirements.txt`.
+- [x] `streamlit run scripts/python/dashboard.py -- --reports-dir reports/` поднимает дашборд на localhost; все 7 tabs рендерятся без ошибок на 1+ run'е.
+- [x] Compare-mode корректно работает на 3+ run'ах: метрики side-by-side, overlay equity curves.
+- [x] Sensitivity tab корректно показывает heatmap при наличии grid-run'ов (например `reports/grid_gamma_beta/run_*/`).
+- [x] `python scripts/python/export_static.py --run reports/avellaneda_stoikov/` создаёт `summary.md` + `plots/*.png` без запуска Streamlit (для submission).
+- [x] README содержит секцию «Viewing results» с командой запуска и скриншотом дашборда.
+- [x] Дашборд работает на чистой машине после `pip install -r requirements.txt`.
 
 ---
 

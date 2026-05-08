@@ -9,8 +9,11 @@ description = "Python audit and reporting utilities for the LOB backtester"
 requires-python = ">=3.11"
 dependencies = [
   "pandas>=2.2",
-  "matplotlib>=3.8",
   "pyarrow>=15.0",
+  "streamlit>=1.57",
+  "plotly>=5.20",
+  "kaleido>=0.2.1,<1",
+  "matplotlib>=3.8",
 ]
 
 [tool.black]

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="680" viewBox="0 0 1180 680" role="img" aria-label="CMF backtest dashboard overview">
+  <rect width="1180" height="680" fill="#f8fafc"/>
+  <rect x="24" y="24" width="244" height="632" rx="8" fill="#0f172a"/>
+  <text x="48" y="72" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="26" font-weight="700">Runs</text>
+  <rect x="48" y="104" width="196" height="40" rx="6" fill="#1e293b"/>
+  <text x="64" y="130" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="15">compare runs</text>
+  <rect x="48" y="168" width="196" height="32" rx="5" fill="#334155"/>
+  <rect x="48" y="212" width="196" height="32" rx="5" fill="#334155"/>
+  <rect x="48" y="256" width="196" height="32" rx="5" fill="#334155"/>
+  <text x="64" y="189" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="13">baseline_fixed</text>
+  <text x="64" y="233" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="13">avellaneda_stoikov</text>
+  <text x="64" y="277" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="13">microprice_as</text>
+  <rect x="48" y="332" width="196" height="8" rx="4" fill="#475569"/>
+  <circle cx="92" cy="336" r="10" fill="#38bdf8"/>
+  <circle cx="212" cy="336" r="10" fill="#38bdf8"/>
+  <text x="48" y="384" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="13">normalize equity</text>
+  <rect x="44" y="370" width="16" height="16" rx="3" fill="#38bdf8"/>
+  <text x="304" y="70" fill="#0f172a" font-family="Arial, sans-serif" font-size="30" font-weight="700">CMF Backtest Reports</text>
+  <g fill="#e2e8f0" stroke="#cbd5e1">
+    <rect x="304" y="104" width="132" height="38" rx="6"/>
+    <rect x="448" y="104" width="144" height="38" rx="6"/>
+    <rect x="604" y="104" width="110" height="38" rx="6"/>
+    <rect x="726" y="104" width="102" height="38" rx="6"/>
+    <rect x="840" y="104" width="82" height="38" rx="6"/>
+    <rect x="934" y="104" width="152" height="38" rx="6"/>
+  </g>
+  <text x="329" y="128" fill="#0f172a" font-family="Arial, sans-serif" font-size="14">Overview</text>
+  <text x="474" y="128" fill="#0f172a" font-family="Arial, sans-serif" font-size="14">Equity &amp; PnL</text>
+  <text x="626" y="128" fill="#0f172a" font-family="Arial, sans-serif" font-size="14">Inventory</text>
+  <text x="749" y="128" fill="#0f172a" font-family="Arial, sans-serif" font-size="14">Quoting</text>
+  <text x="864" y="128" fill="#0f172a" font-family="Arial, sans-serif" font-size="14">Fills</text>
+  <text x="958" y="128" fill="#0f172a" font-family="Arial, sans-serif" font-size="14">Sensitivity</text>
+  <rect x="304" y="178" width="410" height="196" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+  <rect x="744" y="178" width="384" height="196" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+  <rect x="304" y="408" width="824" height="206" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="328" y="218" fill="#334155" font-family="Arial, sans-serif" font-size="15" font-weight="700">Metrics</text>
+  <text x="768" y="218" fill="#334155" font-family="Arial, sans-serif" font-size="15" font-weight="700">Run metadata</text>
+  <text x="328" y="448" fill="#334155" font-family="Arial, sans-serif" font-size="15" font-weight="700">Equity overlay</text>
+  <g stroke-width="3" fill="none">
+    <path d="M330 330 C386 268,442 314,498 254 S610 286,688 228" stroke="#2563eb"/>
+    <path d="M330 338 C388 316,448 340,510 294 S624 320,690 272" stroke="#10b981"/>
+    <path d="M330 346 C396 352,450 306,514 332 S626 300,690 312" stroke="#f97316"/>
+  </g>
+  <g stroke="#94a3b8" stroke-width="1">
+    <line x1="330" y1="334" x2="690" y2="334"/>
+    <line x1="330" y1="298" x2="690" y2="298"/>
+    <line x1="330" y1="262" x2="690" y2="262"/>
+    <line x1="330" y1="226" x2="690" y2="226"/>
+  </g>
+  <g fill="#e2e8f0">
+    <rect x="768" y="248" width="326" height="18" rx="4"/>
+    <rect x="768" y="286" width="300" height="18" rx="4"/>
+    <rect x="768" y="324" width="220" height="18" rx="4"/>
+  </g>
+  <g stroke-width="3" fill="none">
+    <path d="M330 570 C410 520,472 548,538 500 S668 522,744 482 S894 524,1100 460" stroke="#2563eb"/>
+    <path d="M330 586 C420 560,486 574,552 546 S698 554,770 520 S916 548,1100 504" stroke="#10b981"/>
+    <path d="M330 600 C434 608,514 584,598 594 S736 560,824 572 S974 548,1100 548" stroke="#f97316"/>
+  </g>
+  <g stroke="#94a3b8" stroke-width="1">
+    <line x1="330" y1="584" x2="1100" y2="584"/>
+    <line x1="330" y1="544" x2="1100" y2="544"/>
+    <line x1="330" y1="504" x2="1100" y2="504"/>
+    <line x1="330" y1="464" x2="1100" y2="464"/>
+  </g>
+</svg>
