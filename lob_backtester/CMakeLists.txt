@@ -59,6 +59,7 @@ add_library(
   src/lob/execution/FillModel.cpp
   src/lob/execution/OrderManager.cpp
   src/lob/features/FeatureEngine.cpp
+  src/lob/portfolio/Portfolio.cpp
   src/lob/utils/Config.cpp)
 add_library(lob::core ALIAS lob_core)
 
@@ -88,7 +89,8 @@ if(BUILD_TESTING)
     tests/fill_model_test.cpp
     tests/feature_engine_test.cpp
     tests/order_manager_test.cpp
-    tests/order_book_test.cpp)
+    tests/order_book_test.cpp
+    tests/portfolio_test.cpp)
   target_link_libraries(lob_tests PRIVATE lob::core GTest::gtest_main)
   set(LOB_TEST_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/configs")
   set(LOB_TEST_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../data/sample")
