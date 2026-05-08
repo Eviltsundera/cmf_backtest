@@ -17,8 +17,7 @@ struct CsvDataSourceConfig {
 };
 
 CsvDataSourceConfig csv_config_from_directory(const std::filesystem::path &input_dir,
-                                              double tick_size,
-                                              double lot_size);
+                                              double tick_size, double lot_size);
 
 class CsvDataSource final : public IDataSource {
 public:

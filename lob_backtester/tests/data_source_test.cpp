@@ -15,10 +15,8 @@ constexpr double kTickSize = 0.0000001;
 constexpr double kLotSize = 1.0;
 
 std::filesystem::path make_temp_dir(const std::string &name) {
-  const auto suffix =
-      std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
-  const auto path =
-      std::filesystem::temp_directory_path() / (name + "_" + suffix);
+  const auto suffix = std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
+  const auto path = std::filesystem::temp_directory_path() / (name + "_" + suffix);
   std::filesystem::create_directories(path);
   return path;
 }
@@ -54,9 +52,8 @@ lob::data::CsvDataSourceConfig one_source_config() {
 TEST(CsvDataSourceTest, ParsesSnapshotRows) {
   const auto dir = make_temp_dir("lob_snapshot");
   const auto path = dir / "lob.csv";
-  write_file(path, snapshot_header(2) +
-                       "0,1000,0.0000003,2.0,0.0000002,3.0,"
-                       "0.0000004,5.0,0.0000001,7.0\n");
+  write_file(path, snapshot_header(2) + "0,1000,0.0000003,2.0,0.0000002,3.0,"
+                                        "0.0000004,5.0,0.0000001,7.0\n");
 
   auto config = one_source_config();
   config.snapshots_path = path;
@@ -174,8 +171,7 @@ TEST(CsvDataSourceTest, MergesSourcesByTimestampAndSequence) {
   const auto dir = make_temp_dir("lob_merge");
   const auto snapshots = dir / "lob.csv";
   const auto trades = dir / "trades.csv";
-  write_file(snapshots, snapshot_header(1) +
-                            "10,1000,0.0000003,2.0,0.0000002,3.0\n");
+  write_file(snapshots, snapshot_header(1) + "10,1000,0.0000003,2.0,0.0000002,3.0\n");
   write_file(trades, ",local_timestamp,side,price,amount\n"
                      "1,900,sell,0.0000002,1\n"
                      "2,1000,buy,0.0000003,1\n");
@@ -214,10 +210,8 @@ TEST(CsvDataSourceIntegrationTest, DrainsSampleWithAuditCounts) {
   const auto started_at = std::chrono::steady_clock::now();
   const lob::data::EventCounts counts = lob::data::drain_data_source(source);
   const auto elapsed = std::chrono::steady_clock::now() - started_at;
-  const double elapsed_seconds =
-      std::chrono::duration<double>(elapsed).count();
-  const double events_per_sec =
-      static_cast<double>(counts.total()) / elapsed_seconds;
+  const double elapsed_seconds = std::chrono::duration<double>(elapsed).count();
+  const double events_per_sec = static_cast<double>(counts.total()) / elapsed_seconds;
 
   EXPECT_EQ(counts.snapshots, 7200U);
   EXPECT_EQ(counts.depth_updates, 0U);
@@ -225,6 +219,6 @@ TEST(CsvDataSourceIntegrationTest, DrainsSampleWithAuditCounts) {
   EXPECT_EQ(counts.total(), 757667U);
   EXPECT_GT(events_per_sec, 0.0);
 
-  std::cout << "sample_events_per_sec=" << std::fixed << std::setprecision(0)
-            << events_per_sec << '\n';
+  std::cout << "sample_events_per_sec=" << std::fixed << std::setprecision(0) << events_per_sec
+            << '\n';
 }
