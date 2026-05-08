@@ -49,6 +49,10 @@ lob::execution::FillReference parse_fill_reference(const std::string_view value)
   throw std::runtime_error("Unsupported fill_reference: " + std::string(value));
 }
 
+bool is_fixed_spread_strategy(const std::string_view name) {
+  return name == "fixed_spread" || name == "baseline_fixed" || name == "fixed";
+}
+
 std::int64_t milliseconds_to_nanoseconds(const std::int64_t milliseconds) {
   constexpr std::int64_t kNsPerMs = 1'000'000;
   if (milliseconds > std::numeric_limits<std::int64_t>::max() / kNsPerMs ||
@@ -72,12 +76,27 @@ engine_config_from_app_config(const lob::utils::AppConfig &config) {
   engine_config.fills.taker_bps = config.execution.taker_bps;
   engine_config.quote_refresh_ns = milliseconds_to_nanoseconds(config.strategy.quote_refresh_ms);
   engine_config.output_dir = config.run.output_dir;
+  if (config.strategy.max_inventory > 0) {
+    engine_config.orders.risk.max_inventory_lots = config.strategy.max_inventory;
+  }
+  if (is_fixed_spread_strategy(config.strategy.name)) {
+    engine_config.orders.risk.strict_maker = true;
+  }
   return engine_config;
 }
 
-std::unique_ptr<lob::strategies::IStrategy> make_strategy(const std::string_view name) {
+std::unique_ptr<lob::strategies::IStrategy>
+make_strategy(const lob::utils::StrategyConfig &config) {
+  const std::string_view name(config.name);
   if (name == "noop" || name == "no_op" || name == "none") {
     return std::make_unique<lob::strategies::NoopStrategy>();
+  }
+  if (is_fixed_spread_strategy(name)) {
+    lob::strategies::FixedSpreadStrategyConfig strategy_config;
+    strategy_config.delta_ticks = config.delta_ticks;
+    strategy_config.order_quantity_lots = config.order_qty;
+    strategy_config.max_inventory_lots = config.max_inventory;
+    return std::make_unique<lob::strategies::FixedSpreadStrategy>(strategy_config);
   }
   throw std::runtime_error("Strategy is not implemented yet: " + std::string(name));
 }
@@ -97,7 +116,7 @@ int main(const int argc, char **argv) {
 
     lob::data::CsvDataSource source(lob::data::csv_config_from_directory(
         config.run.input_path, config.market.tick_size, config.market.lot_size));
-    std::unique_ptr<lob::strategies::IStrategy> strategy = make_strategy(config.strategy.name);
+    std::unique_ptr<lob::strategies::IStrategy> strategy = make_strategy(config.strategy);
     const lob::engine::BacktestResult result =
         lob::engine::BacktestEngine(engine_config_from_app_config(config)).run(source, *strategy);
 

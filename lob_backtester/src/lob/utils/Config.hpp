@@ -34,6 +34,9 @@ struct StrategyConfig {
   double gamma = 0.0;
   double sigma = 0.0;
   double k = 0.0;
+  std::int64_t delta_ticks = 0;
+  std::int64_t order_qty = 0;
+  std::int64_t max_inventory = 0;
   std::int64_t quote_refresh_ms = 0;
 };
 

@@ -372,18 +372,32 @@ strategy через `on_fill`, вызывает `on_market_event` по `quote_re
 
 ---
 
-## T9. Naive baseline strategy: fixed spread
+## T9. Naive baseline strategy: fixed spread [done]
 
 **Цель:** простейшая стратегия для sanity-тестов и сравнения.
+
+**Статус:** done 2026-05-08.
 
 **Подзадачи:**
 - `FixedSpreadStrategy`: cancel_all → submit bid=mid-Δ, ask=mid+Δ каждые `quote_refresh_ms`.
 - Конфиг: `delta_ticks`, `order_qty`, `quote_refresh_ms`, `max_inventory`.
 
 **DoD:**
-- [ ] Юнит-тест на генерацию intents: ровно cancel_all + 1 buy + 1 sell.
-- [ ] Прогон на sample → `reports/baseline_fixed/` создан, метрики не NaN.
-- [ ] При `fees=0` и mean-reverting синтетике стратегия зарабатывает положительный PnL.
+- [x] Юнит-тест на генерацию intents: ровно cancel_all + 1 buy + 1 sell.
+- [x] Прогон на sample → equivalent artifacts в
+  `lob_backtester/artifacts/runs/baseline_fixed/`, метрики не NaN.
+- [x] При `fees=0` и mean-reverting синтетике стратегия зарабатывает положительный PnL.
+
+**Итог:** добавлен `lob::strategies::FixedSpreadStrategy` с guard-ами по
+`delta_ticks`, `order_qty`, `max_inventory` и inventory-aware отключением bid/ask
+сторон. CLI поддерживает `strategy.name: fixed_spread`, config
+`lob_backtester/configs/baseline_fixed_spread.yaml` запускает sample replay и
+пишет артефакты в ignored run directory.
+
+Проверено: `cmake --build build -j2`,
+`./build/lob_tests --gtest_filter='FixedSpreadStrategyTest.*' --gtest_color=no`,
+focused BacktestEngine/Config tests для fixed-spread, полный `ctest`,
+`clang-format --dry-run --Werror`, `git diff --check`.
 
 ---
 

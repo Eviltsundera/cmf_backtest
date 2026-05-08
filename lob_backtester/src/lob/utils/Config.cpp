@@ -55,6 +55,11 @@ AppConfig load_config(const std::filesystem::path &path) {
   config.strategy.gamma = strategy["gamma"] ? strategy["gamma"].as<double>() : 0.0;
   config.strategy.sigma = strategy["sigma"] ? strategy["sigma"].as<double>() : 0.0;
   config.strategy.k = strategy["k"] ? strategy["k"].as<double>() : 0.0;
+  config.strategy.delta_ticks =
+      strategy["delta_ticks"] ? strategy["delta_ticks"].as<std::int64_t>() : 0;
+  config.strategy.order_qty = strategy["order_qty"] ? strategy["order_qty"].as<std::int64_t>() : 0;
+  config.strategy.max_inventory =
+      strategy["max_inventory"] ? strategy["max_inventory"].as<std::int64_t>() : 0;
   config.strategy.quote_refresh_ms =
       strategy["quote_refresh_ms"] ? strategy["quote_refresh_ms"].as<std::int64_t>() : 0;
 
@@ -78,6 +83,9 @@ std::string describe_config(const AppConfig &config) {
   out << "gamma=" << config.strategy.gamma << '\n';
   out << "sigma=" << config.strategy.sigma << '\n';
   out << "k=" << config.strategy.k << '\n';
+  out << "delta_ticks=" << config.strategy.delta_ticks << '\n';
+  out << "order_qty=" << config.strategy.order_qty << '\n';
+  out << "max_inventory=" << config.strategy.max_inventory << '\n';
   out << "quote_refresh_ms=" << config.strategy.quote_refresh_ms;
   return out.str();
 }

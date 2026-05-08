@@ -2,6 +2,7 @@
 #include "lob/engine/BacktestEngine.hpp"
 
 #include <chrono>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -183,6 +184,15 @@ lob::engine::BacktestEngineConfig default_engine_config() {
   return config;
 }
 
+lob::strategies::FixedSpreadStrategyConfig fixed_spread_strategy_config() {
+  lob::strategies::FixedSpreadStrategyConfig config;
+  config.strategy_id = 1;
+  config.delta_ticks = 1;
+  config.order_quantity_lots = 1;
+  config.max_inventory_lots = 10;
+  return config;
+}
+
 } // namespace
 
 TEST(BacktestEngineTest, RunsSyntheticStreamThroughOrdersFillsPortfolioMetricsAndArtifacts) {
@@ -224,6 +234,27 @@ TEST(BacktestEngineTest, RunsSyntheticStreamThroughOrdersFillsPortfolioMetricsAn
             0U);
   EXPECT_EQ(read_file(output_dir / "inventory.csv").find("ts_ns,position_lots"), 0U);
   std::filesystem::remove_all(output_dir);
+}
+
+TEST(BacktestEngineTest, FixedSpreadEarnsPositivePnlOnMeanRevertingSyntheticWithZeroFees) {
+  VectorDataSource source({
+      snapshot_event(1'000, 1, 99, 10, 101, 10),
+      trade_event(2'000, 2, lob::data::TradeSide::Sell, 99),
+      trade_event(3'000, 3, lob::data::TradeSide::Buy, 101),
+  });
+  lob::strategies::FixedSpreadStrategy strategy(fixed_spread_strategy_config());
+
+  auto config = default_engine_config();
+  config.orders.risk.max_inventory_lots = 10;
+  config.orders.risk.strict_maker = true;
+
+  const lob::engine::BacktestResult result =
+      lob::engine::BacktestEngine(config).run(source, strategy);
+
+  EXPECT_EQ(result.fill_count, 2U);
+  EXPECT_EQ(result.portfolio.position_lots(), 0);
+  EXPECT_GT(result.metrics.final_pnl, 0.0);
+  EXPECT_DOUBLE_EQ(result.metrics.final_pnl, 2.0);
 }
 
 TEST(BacktestEngineTest, AppliesSameEventFillBatchBeforeFillCallbacks) {
@@ -312,4 +343,39 @@ TEST(BacktestEngineIntegrationTest, ReplaysSampleAndReportsThroughput) {
 
   std::cout << "engine_sample_events_per_sec=" << std::fixed << std::setprecision(0)
             << result.events_per_second << '\n';
+}
+
+TEST(BacktestEngineIntegrationTest, FixedSpreadSampleRunWritesFiniteMetricsAndArtifacts) {
+  const auto data_dir = std::filesystem::path(LOB_TEST_DATA_DIR);
+  ASSERT_TRUE(std::filesystem::exists(data_dir / "lob.csv"));
+  ASSERT_TRUE(std::filesystem::exists(data_dir / "trades.csv"));
+
+  lob::data::CsvDataSource source(lob::data::csv_config_from_directory(data_dir, 0.0000001, 1.0));
+  lob::strategies::FixedSpreadStrategy strategy(fixed_spread_strategy_config());
+  auto config = default_engine_config();
+  const auto output_dir = make_temp_dir("lob_fixed_spread_sample");
+  config.book.max_depth = 50;
+  config.orders.risk.max_inventory_lots = 10;
+  config.orders.risk.strict_maker = true;
+  config.quote_refresh_ns = 100'000'000;
+  config.output_dir = output_dir;
+
+  const lob::engine::BacktestResult result =
+      lob::engine::BacktestEngine(config).run(source, strategy);
+
+  EXPECT_EQ(result.event_counts.total(), 757667U);
+  EXPECT_GT(result.order_event_count, 0U);
+  EXPECT_TRUE(std::isfinite(result.metrics.final_pnl));
+  EXPECT_TRUE(std::isfinite(result.metrics.mean_inventory));
+  EXPECT_TRUE(std::isfinite(result.metrics.inventory_std));
+  EXPECT_TRUE(std::isfinite(result.metrics.fill_rate));
+  EXPECT_TRUE(std::isfinite(result.metrics.max_drawdown));
+  EXPECT_TRUE(std::isfinite(result.metrics.avg_quoted_spread));
+  EXPECT_TRUE(std::isfinite(result.metrics.avg_spread_captured));
+  EXPECT_TRUE(std::isfinite(result.metrics.quote_uptime));
+  EXPECT_TRUE(std::filesystem::exists(output_dir / "metrics.json"));
+  EXPECT_TRUE(std::filesystem::exists(output_dir / "orders.csv"));
+  EXPECT_TRUE(std::filesystem::exists(output_dir / "fills.csv"));
+  EXPECT_NE(read_file(output_dir / "metrics.json").find("\"final_pnl\""), std::string::npos);
+  std::filesystem::remove_all(output_dir);
 }

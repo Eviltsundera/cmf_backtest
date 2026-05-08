@@ -35,12 +35,17 @@ directly:
 ./build/lob_backtest --config lob_backtester/configs/example.yaml
 ```
 
-The current CLI runs the configured CSV replay with `strategy.name: noop`, prints
-a short run summary, and writes artifacts to `run.output_dir`.
+The CLI runs the configured CSV replay, prints a short run summary, and writes
+artifacts to `run.output_dir`. The fixed-spread baseline config is:
+
+```bash
+./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
+```
 
 Implemented engine modules currently include DataLoader, Market-By-Price
 OrderBook, FeatureEngine, Strategy interface, OrderManager, FillModel,
-Portfolio, MetricsEngine, and BacktestEngine.
+Portfolio, MetricsEngine, BacktestEngine, NoopStrategy, and
+FixedSpreadStrategy.
 
 ## Documentation
 

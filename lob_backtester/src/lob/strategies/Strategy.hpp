@@ -44,4 +44,24 @@ public:
                                               const MarketState &state) override;
 };
 
+struct FixedSpreadStrategyConfig {
+  execution::StrategyId strategy_id = 1;
+  book::Price delta_ticks = 1;
+  execution::Quantity order_quantity_lots = 1;
+  execution::Quantity max_inventory_lots = 1;
+};
+
+class FixedSpreadStrategy final : public IStrategy {
+public:
+  explicit FixedSpreadStrategy(FixedSpreadStrategyConfig config);
+
+  std::vector<execution::OrderIntent> on_market_event(const data::MarketEvent &event,
+                                                      const MarketState &state) override;
+  std::vector<execution::OrderIntent> on_fill(const execution::Fill &fill,
+                                              const MarketState &state) override;
+
+private:
+  FixedSpreadStrategyConfig config_;
+};
+
 } // namespace lob::strategies

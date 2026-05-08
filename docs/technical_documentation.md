@@ -1,6 +1,6 @@
 # Техническая документация: LOB Backtester
 
-**Статус:** draft, синхронизирован с T8 Engine event loop.
+**Статус:** draft, синхронизирован с T9 FixedSpreadStrategy.
 
 Документ описывает целевую архитектуру CMF LOB backtesting engine и то, что уже
 есть в репозитории. Детальный task tracker остается в
@@ -25,7 +25,7 @@ latency и partial fills считаются расширениями, если �
 
 ## 2. Текущая реализация
 
-Сейчас кодовая база находится на уровне T8 Engine event loop:
+Сейчас кодовая база находится на уровне T9 FixedSpreadStrategy:
 
 - `lob_backtester/CMakeLists.txt` определяет `lob_core`, `lob_backtest` и
   `lob_tests`.
@@ -50,14 +50,16 @@ latency и partial fills считаются расширениями, если �
 - `lob_backtester/src/lob/metrics/MetricsEngine.hpp` и `.cpp` агрегируют
   run metrics и пишут `metrics.json`, `equity_curve.csv`, `inventory.csv`.
 - `lob_backtester/src/lob/strategies/Strategy.hpp` и `.cpp` определяют
-  `IStrategy`, `MarketState` и `NoopStrategy`.
+  `IStrategy`, `MarketState`, `NoopStrategy` и `FixedSpreadStrategy`.
 - `lob_backtester/src/lob/engine/BacktestEngine.hpp` и `.cpp` реализуют
   event loop, scheduler, strategy callbacks и `fills.csv`.
 - `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, загружает YAML,
-  запускает CSV replay с `strategy.name: noop`, печатает summary и пишет
-  artifacts в `run.output_dir`.
+  запускает CSV replay с `strategy.name: noop` или `fixed_spread`, печатает
+  summary и пишет artifacts в `run.output_dir`.
 - `lob_backtester/configs/example.yaml` содержит smoke config, согласованный с
   `docs/data_audit.md`.
+- `lob_backtester/configs/baseline_fixed_spread.yaml` содержит sample run config
+  для baseline fixed-spread стратегии.
 - `lob_backtester/tests/*_test.cpp` покрывают config, DataLoader, order book,
   features, OMS, fill model, portfolio accounting, metrics aggregation и
   engine integration.
@@ -255,13 +257,36 @@ strategy:
   gamma: 0.1
   sigma: 0.02
   k: 1.5
+  delta_ticks: 1
+  order_qty: 1
+  max_inventory: 10
   quote_refresh_ms: 100
 ```
 
-Будущие задачи расширят схему настройками DataLoader, strategy-specific
-секциями, reporting settings, CLI overrides и run metadata.
+Для fixed-spread baseline используется `strategy.name: fixed_spread`; CLI также
+поддерживает aliases `baseline_fixed` и `fixed`. `quote_refresh_ms` остается
+engine scheduler параметром, а `max_inventory` дополнительно прокидывается в
+OMS risk gate. Будущие задачи расширят схему настройками DataLoader,
+strategy-specific секциями, reporting settings, CLI overrides и run metadata.
 
 ## 6. Модели стратегий
+
+### Fixed Spread Baseline
+
+`FixedSpreadStrategy` является sanity baseline. На каждом scheduled callback
+она генерирует:
+
+```text
+cancel_all(strategy_id)
+bid = floor(mid - delta_ticks)
+ask = ceil(mid + delta_ticks)
+```
+
+Bid не выставляется, если возможное исполнение превысит long-side
+`max_inventory`; ask не выставляется, если возможное исполнение превысит
+short-side лимит. Если mid отсутствует или quote prices невалидны, стратегия
+только снимает старые заявки. CLI включает maker-only risk gate для этой
+стратегии.
 
 ### Avellaneda-Stoikov
 
@@ -308,6 +333,7 @@ cmake -S lob_backtester -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ctest --test-dir build --output-on-failure
 ./build/lob_backtest --config lob_backtester/configs/example.yaml
+./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
 ```
 
 Проверка форматирования:
@@ -380,9 +406,8 @@ data используется для integration и throughput checks после
 
 Ближайшие задачи:
 
-1. T9: добавить fixed-spread baseline strategy.
-2. T10: добавить Avellaneda-Stoikov strategy.
-3. T11-T14: конфиги, dashboard, эксперименты, отчет и финальная полировка.
+1. T10: добавить Avellaneda-Stoikov strategy.
+2. T11-T14: конфиги, dashboard, эксперименты, отчет и финальная полировка.
 
 Финальные deliverables:
 

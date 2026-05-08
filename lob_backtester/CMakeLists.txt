@@ -91,6 +91,7 @@ if(BUILD_TESTING)
     tests/config_smoke_test.cpp
     tests/data_source_test.cpp
     tests/fill_model_test.cpp
+    tests/fixed_spread_strategy_test.cpp
     tests/feature_engine_test.cpp
     tests/metrics_engine_test.cpp
     tests/order_manager_test.cpp
