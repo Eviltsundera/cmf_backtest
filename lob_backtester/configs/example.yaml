@@ -1,0 +1,24 @@
+run:
+  symbol: BTCUSDT
+  input_path: ../data/sample
+  output_dir: artifacts/runs/example
+
+market:
+  tick_size: 0.01
+  lot_size: 0.000001
+
+book:
+  max_depth: 50
+
+execution:
+  fill_model: price_cross
+  fill_reference: trade_price
+  partial_fills: false
+  maker_bps: 0.0
+  taker_bps: 0.0
+
+strategy:
+  name: avellaneda_stoikov
+  gamma: 0.1
+  sigma: 0.02
+  k: 1.5

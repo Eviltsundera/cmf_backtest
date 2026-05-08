@@ -1,0 +1,16 @@
+build/
+cmake-build-*/
+.cache/
+.vscode/
+.idea/
+compile_commands.json
+
+lob_backtester/build/
+lob_backtester/artifacts/
+lob_backtester/scripts/python/.venv/
+lob_backtester/scripts/python/__pycache__/
+lob_backtester/scripts/python/.pytest_cache/
+
+data/raw/
+*.zip
+*.log
