@@ -76,11 +76,14 @@ include(CTest)
 if(BUILD_TESTING)
   add_executable(lob_tests tests/config_smoke_test.cpp tests/data_source_test.cpp)
   target_link_libraries(lob_tests PRIVATE lob::core GTest::gtest_main)
+  set(LOB_TEST_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/configs")
+  set(LOB_TEST_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../data/sample")
   target_compile_definitions(
     lob_tests
     PRIVATE
-      LOB_TEST_CONFIG_DIR="${CMAKE_CURRENT_SOURCE_DIR}/configs"
-      LOB_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../data/sample")
+      LOB_TEST_CONFIG_DIR="${LOB_TEST_CONFIG_DIR}"
+      LOB_TEST_DATA_DIR="${LOB_TEST_DATA_DIR}"
+  )
   target_compile_options(
     lob_tests
     PRIVATE
