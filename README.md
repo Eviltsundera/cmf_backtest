@@ -57,6 +57,78 @@ Implemented:
 
 Next planned work: optional roadmap items beyond the MVP submission.
 
+## Work Report
+
+The repository now covers the full MVP submission path from raw data audit to a
+reproducible local submission bundle.
+
+| Area | Delivered |
+| --- | --- |
+| Data | CSV schema audit, deterministic one-hour sample, C++ streaming loader. |
+| Market data replay | Market-By-Price order book, book features, rolling volatility. |
+| Execution | Owned order lifecycle, maker-only risk gates, price-cross fill model, fees/rebates. |
+| Accounting | Portfolio cash/inventory/PnL, equity curve, inventory series. |
+| Strategies | Fixed spread, classic Avellaneda-Stoikov, microprice-adjusted A-S. |
+| Metrics | PnL, drawdown, inventory, turnover, fill rate, spread capture, quote uptime, 1s/10s adverse-selection markout. |
+| Reporting | Streamlit dashboard, static export, final report, sensitivity heatmaps. |
+| Submission | Local package builder under `submission/cmf_lob_backtester`. |
+
+## Strategy Comparison
+
+Latest sample experiment command:
+
+```bash
+python3 scripts/python/run_experiments.py
+```
+
+Dataset: `data/sample`, `2024-08-05T06:00:00Z` to
+`2024-08-05T07:00:00Z`, `757,667` replay events.
+
+| Strategy | Net PnL | Max DD | Mean inv | Max inv | Turnover qty | Fill rate | Spread captured | Adv 1s | Adv 10s |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Fixed spread | -741593 | 742064 | 0.601 | 10 | 31618 | 0.598724 | 1.001 | -24.153 | -23.945 |
+| A-S | -4345 | 48629.5 | 6.078 | 10 | 30 | 0.001700 | 9.617 | -7.117 | -39.063 |
+| Microprice A-S | -4345 | 48633.5 | 6.071 | 10 | 28 | 0.001559 | 8.304 | -4.321 | -25.750 |
+
+Sensitivity grid:
+
+| Segment | Result |
+| --- | --- |
+| Grid | `gamma in {0.005, 0.01, 0.02}`, `k in {0.5, 1.0, 2.0}`, `beta in {0.0, 0.5, 1.0}` |
+| Best run | `gamma=0.02`, `k=1.0`, `beta=1.0`, net PnL `77` |
+| Mean PnL, `beta=0.0` | `-6072.389` |
+| Mean PnL, `beta=0.5` | `-4213.944` |
+| Mean PnL, `beta=1.0` | `-4383.889` |
+
+![Final PnL by gamma and beta](docs/assets/final_pnl_gamma_beta.svg)
+
+![Final PnL by gamma and k](docs/assets/final_pnl_gamma_k.svg)
+
+Conclusions:
+
+- The fixed-spread baseline is too aggressive on this sample: it captures many
+  fills but accumulates severe drawdown and adverse selection.
+- Classic A-S strongly reduces turnover and drawdown by widening quotes and
+  skewing for inventory, at the cost of a low fill rate.
+- Microprice A-S matches classic A-S net PnL on the base config and improves
+  1s/10s markout; in the grid, `beta > 0` is better on average than `beta=0`.
+- `beta=0.5` has the best average grid PnL, while the single best run uses
+  `beta=1.0`; that suggests full microprice skew can work, but a softer signal
+  weight is more stable.
+
+## Roadmap
+
+| Priority | Plan | Rationale |
+| --- | --- | --- |
+| P1 | Queue position model | Price-cross fills are optimistic without queue position. |
+| P1 | Partial fills | Better match trade-size and available-volume constraints. |
+| P2 | Latency model | Submit/cancel latency changes maker fill quality and stale quote risk. |
+| P2 | Fee tiers and venue rebates | More realistic net PnL for market making. |
+| P2 | PnL decomposition | Split PnL into spread capture, inventory drift, fees, and adverse selection. |
+| P3 | Learned microprice | Replace top-of-book proxy with empirical short-horizon transition estimates. |
+| P3 | Walk-forward optimization | Separate calibration, validation, and final test runs on larger local data. |
+| P3 | Performance profiling | Optimize parser/replay only after profiling a larger dataset. |
+
 ## Repository Layout
 
 ```text
@@ -151,6 +223,10 @@ Run the dashboard against generated reports:
 ```bash
 streamlit run scripts/python/dashboard.py -- --reports-dir reports/
 ```
+
+The dashboard discovers all run directories recursively by `metrics.json`.
+In compare mode, use the sidebar `Run preset` control to switch between all
+runs, base runs, grid runs, or a manual selection.
 
 For tracked sample report fixtures that work on a clean checkout, use:
 

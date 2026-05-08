@@ -33,6 +33,18 @@ def cached_load_run(run_dir: str, reports_dir: str) -> reporting.RunArtifacts:
     return reporting.load_run(Path(run_dir), Path(reports_dir))
 
 
+def compare_default_labels(labels: list[str], preset: str) -> list[str]:
+    if preset == "base runs":
+        base = [label for label in labels if "/" not in label]
+        return base or labels
+    if preset == "grid runs":
+        grid = [label for label in labels if label.startswith("grid_")]
+        return grid or labels
+    if preset == "all runs":
+        return labels
+    return labels[: min(3, len(labels))]
+
+
 def main() -> None:
     args = parse_args()
     requested_reports_dir = args.reports_dir
@@ -46,20 +58,37 @@ def main() -> None:
         st.caption(f"Reports directory: `{reports_dir}`")
         if reports_dir != requested_reports_dir:
             st.info(f"`{requested_reports_dir}` was not found; using sample artifacts.")
+        if st.button("Refresh reports"):
+            cached_run_dirs.clear()
+            cached_load_run.clear()
+            st.rerun()
 
         run_dirs = cached_run_dirs(str(reports_dir))
         labels = {reporting.run_label(Path(path), reports_dir): path for path in run_dirs}
         if not labels:
             st.warning("No run directories with metrics.json were found.")
             return
+        label_list = list(labels)
+        st.caption(f"Discovered runs: {len(label_list)}")
 
         mode = st.radio("Mode", ["single run", "compare runs"], horizontal=False)
         if mode == "single run":
-            selected_label = st.selectbox("Run", list(labels))
+            selected_label = st.selectbox("Run", label_list)
             selected_labels = [selected_label]
         else:
-            default = list(labels)[: min(3, len(labels))]
-            selected_labels = st.multiselect("Runs", list(labels), default=default)
+            preset = st.radio(
+                "Run preset",
+                ["all runs", "base runs", "grid runs", "manual"],
+                horizontal=False,
+            )
+            default = compare_default_labels(label_list, preset)
+            selected_labels = st.multiselect(
+                "Runs",
+                label_list,
+                default=default,
+                key=f"runs_{preset.replace(' ', '_')}",
+            )
+            st.caption(f"Selected runs: {len(selected_labels)}")
 
         normalize_equity = st.checkbox("Normalize equity at first sample", value=False)
 
