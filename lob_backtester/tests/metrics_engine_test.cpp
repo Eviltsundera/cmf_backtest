@@ -124,6 +124,8 @@ TEST(MetricsEngineTest, AggregatesInventoryTurnoverDrawdownAndMarketMakingMetric
 TEST(MetricsEngineTest, RejectsInvalidQuotesAndAdverseSelectionInputs) {
   lob::metrics::MetricsEngine metrics;
   EXPECT_THROW(metrics.record_quote(0, 100.0, 100.0), std::runtime_error);
+  EXPECT_THROW(metrics.record_quote(0, 0.0, std::nullopt), std::runtime_error);
+  EXPECT_THROW(metrics.record_quote(0, std::nullopt, -1.0), std::runtime_error);
   metrics.record_quote(1, 99.0, 101.0);
   EXPECT_DOUBLE_EQ(metrics.compute().quote_uptime, 1.0);
 
@@ -133,5 +135,27 @@ TEST(MetricsEngineTest, RejectsInvalidQuotesAndAdverseSelectionInputs) {
   EXPECT_THROW(
       metrics.record_adverse_selection(make_fill(lob::execution::OrderSide::Buy, 99, 1), 1000, 0.0),
       std::runtime_error);
+  EXPECT_THROW(metrics.record_adverse_selection(make_fill(lob::execution::OrderSide::Buy, -99, 1),
+                                                1000, 100.0),
+               std::runtime_error);
   EXPECT_TRUE(metrics.compute().adverse_selection_h.empty());
+}
+
+TEST(MetricsEngineTest, RejectsInvalidFillReferenceWithoutMutatingAggregates) {
+  lob::metrics::MetricsEngine metrics;
+  const auto fill = make_fill(lob::execution::OrderSide::Buy, 99, 2);
+
+  EXPECT_THROW(metrics.record_fill(fill, 0.0), std::runtime_error);
+  auto snapshot = metrics.compute();
+  EXPECT_EQ(snapshot.fill_count, 0U);
+  EXPECT_EQ(snapshot.turnover_qty, 0);
+  EXPECT_DOUBLE_EQ(snapshot.turnover_notional, 0.0);
+  EXPECT_DOUBLE_EQ(snapshot.avg_spread_captured, 0.0);
+
+  metrics.record_fill(fill, 100.0);
+  snapshot = metrics.compute();
+  EXPECT_EQ(snapshot.fill_count, 1U);
+  EXPECT_EQ(snapshot.turnover_qty, 2);
+  EXPECT_DOUBLE_EQ(snapshot.turnover_notional, 198.0);
+  EXPECT_DOUBLE_EQ(snapshot.avg_spread_captured, 1.0);
 }

@@ -107,13 +107,18 @@ void MetricsEngine::record_fill(const execution::Fill &fill,
     throw std::runtime_error("MetricsEngine fill fee must be finite");
   }
 
+  std::optional<double> captured_spread;
+  if (reference_mid_price) {
+    captured_spread = spread_captured(fill, *reference_mid_price);
+  }
+
   turnover_qty_ += fill.quantity_lots;
   turnover_notional_ += std::abs(static_cast<double>(fill.fill_price_ticks) *
                                  static_cast<double>(fill.quantity_lots));
   ++fill_count_;
 
-  if (reference_mid_price) {
-    spread_captured_.push(spread_captured(fill, *reference_mid_price));
+  if (captured_spread) {
+    spread_captured_.push(*captured_spread);
   }
 }
 
