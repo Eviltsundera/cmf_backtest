@@ -124,7 +124,14 @@ TEST(MetricsEngineTest, AggregatesInventoryTurnoverDrawdownAndMarketMakingMetric
 TEST(MetricsEngineTest, RejectsInvalidQuotesAndAdverseSelectionInputs) {
   lob::metrics::MetricsEngine metrics;
   EXPECT_THROW(metrics.record_quote(0, 100.0, 100.0), std::runtime_error);
+  metrics.record_quote(1, 99.0, 101.0);
+  EXPECT_DOUBLE_EQ(metrics.compute().quote_uptime, 1.0);
+
   EXPECT_THROW(
       metrics.record_adverse_selection(make_fill(lob::execution::OrderSide::Buy, 99, 1), 0, 100.0),
       std::runtime_error);
+  EXPECT_THROW(
+      metrics.record_adverse_selection(make_fill(lob::execution::OrderSide::Buy, 99, 1), 1000, 0.0),
+      std::runtime_error);
+  EXPECT_TRUE(metrics.compute().adverse_selection_h.empty());
 }

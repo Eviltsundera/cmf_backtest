@@ -127,14 +127,19 @@ void MetricsEngine::set_fill_opportunity_count(const std::size_t fill_opportunit
 
 void MetricsEngine::record_quote(const std::int64_t, const std::optional<double> bid_price,
                                  const std::optional<double> ask_price) {
+  if (bid_price) {
+    validate_price(*bid_price, "bid price");
+  }
+  if (ask_price) {
+    validate_price(*ask_price, "ask price");
+  }
+  if (bid_price && ask_price && *ask_price <= *bid_price) {
+    throw std::runtime_error("MetricsEngine quote ask must be greater than bid");
+  }
+
   ++quote_sample_count_;
   if (!bid_price || !ask_price) {
     return;
-  }
-  validate_price(*bid_price, "bid price");
-  validate_price(*ask_price, "ask price");
-  if (*ask_price <= *bid_price) {
-    throw std::runtime_error("MetricsEngine quote ask must be greater than bid");
   }
 
   ++active_quote_sample_count_;
@@ -147,7 +152,8 @@ void MetricsEngine::record_adverse_selection(const execution::Fill &fill,
   if (horizon_ns <= 0) {
     throw std::runtime_error("MetricsEngine adverse-selection horizon must be positive");
   }
-  adverse_selection_by_horizon_[horizon_ns].push(adverse_selection_markout(fill, future_mid_price));
+  const double markout = adverse_selection_markout(fill, future_mid_price);
+  adverse_selection_by_horizon_[horizon_ns].push(markout);
 }
 
 MetricsSnapshot MetricsEngine::compute() const {
