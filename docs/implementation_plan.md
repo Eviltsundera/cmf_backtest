@@ -450,10 +450,24 @@ focused Config/BacktestEngine integration для A-S, CLI sample run,
 - Конфиг: `microprice_alpha`, `microprice_beta`, `fair_price_mode`.
 
 **DoD:**
-- [ ] При `β=0` стратегия численно совпадает с A–S (юнит-тест на одинаковом потоке).
-- [ ] При `imbalance > 0` (bid-heavy) reservation > классический A–S при том же `q`.
-- [ ] При `imbalance < 0` (ask-heavy) reservation < классический A–S.
-- [ ] Прогон на sample → `reports/microprice_as/`.
+- [x] При `β=0` стратегия численно совпадает с A–S (юнит-тест на одинаковом потоке).
+- [x] При `imbalance > 0` (bid-heavy) reservation > классический A–S при том же `q`.
+- [x] При `imbalance < 0` (ask-heavy) reservation < классический A–S.
+- [x] Прогон на sample → `lob_backtester/artifacts/runs/microprice_as/`.
+
+**Итог:** T11 закрыта. `AvellanedaStoikovStrategy` поддерживает
+`FairPriceMode::MicropriceProxy`: fair price считается как
+`mid + microprice_beta * (microprice_proxy - mid)`, где
+`microprice_proxy = mid + microprice_alpha * (spread / 2) * imbalance`.
+CLI поддерживает `strategy.name: microprice_as` с aliases
+`microprice_avellaneda_stoikov` и `mp_as`; добавлен sample config
+`lob_backtester/configs/microprice_as.yaml`.
+
+Проверено: `cmake --build build -j2`,
+`./build/lob_tests --gtest_filter='*Microprice*:*AvellanedaStoikov*' --gtest_color=no`,
+focused Config/BacktestEngine integration для Microprice-A-S,
+CLI sample run, полный `ctest`, `clang-format --dry-run --Werror`,
+`git diff --check`.
 
 ---
 

@@ -1,6 +1,6 @@
 # Техническая документация: LOB Backtester
 
-**Статус:** draft, синхронизирован с T10 AvellanedaStoikovStrategy.
+**Статус:** draft, синхронизирован с T11 Microprice extension.
 
 Документ описывает целевую архитектуру CMF LOB backtesting engine и то, что уже
 есть в репозитории. Детальный task tracker остается в
@@ -25,7 +25,7 @@ latency и partial fills считаются расширениями, если �
 
 ## 2. Текущая реализация
 
-Сейчас кодовая база находится на уровне T10 AvellanedaStoikovStrategy:
+Сейчас кодовая база находится на уровне T11 Microprice extension:
 
 - `lob_backtester/CMakeLists.txt` определяет `lob_core`, `lob_backtest` и
   `lob_tests`.
@@ -51,18 +51,22 @@ latency и partial fills считаются расширениями, если �
   run metrics и пишут `metrics.json`, `equity_curve.csv`, `inventory.csv`.
 - `lob_backtester/src/lob/strategies/Strategy.hpp` и `.cpp` определяют
   `IStrategy`, `MarketState`, `NoopStrategy`, `FixedSpreadStrategy`,
-  `AvellanedaStoikovStrategy` и тестируемую A-S formula helper.
+  `AvellanedaStoikovStrategy`, classic/microprice fair-price modes и
+  тестируемые A-S formula helpers.
 - `lob_backtester/src/lob/engine/BacktestEngine.hpp` и `.cpp` реализуют
   event loop, scheduler, strategy callbacks и `fills.csv`.
 - `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, загружает YAML,
   запускает CSV replay с `strategy.name: noop`, `fixed_spread` или
-  `avellaneda_stoikov`, печатает summary и пишет artifacts в `run.output_dir`.
+  `avellaneda_stoikov`/`microprice_as`, печатает summary и пишет artifacts в
+  `run.output_dir`.
 - `lob_backtester/configs/example.yaml` содержит smoke config, согласованный с
   `docs/data_audit.md`.
 - `lob_backtester/configs/baseline_fixed_spread.yaml` содержит sample run config
   для baseline fixed-spread стратегии.
 - `lob_backtester/configs/avellaneda_stoikov.yaml` содержит sample run config
   для классической A-S стратегии.
+- `lob_backtester/configs/microprice_as.yaml` содержит sample run config для
+  microprice-adjusted A-S стратегии.
 - `lob_backtester/tests/*_test.cpp` покрывают config, DataLoader, order book,
   features, OMS, fill model, portfolio accounting, metrics aggregation и
   engine integration.
@@ -263,6 +267,9 @@ strategy:
   horizon_seconds: 3600.0
   sigma_window_ms: 1000
   min_spread_ticks: 2
+  fair_price_mode: mid
+  microprice_alpha: 1.0
+  microprice_beta: 1.0
   delta_ticks: 1
   order_qty: 1
   max_inventory: 10
@@ -272,6 +279,9 @@ strategy:
 Для fixed-spread baseline используется `strategy.name: fixed_spread`; CLI также
 поддерживает aliases `baseline_fixed` и `fixed`. Для классической модели
 используется `strategy.name: avellaneda_stoikov`; aliases: `avellaneda`, `as`.
+Для microprice extension используется `strategy.name: microprice_as`;
+поддерживаются aliases `microprice_avellaneda_stoikov` и `mp_as`, а
+`fair_price_mode` должен быть `microprice_proxy`.
 `quote_refresh_ms` остается engine scheduler параметром, а `max_inventory`
 дополнительно прокидывается в OMS risk gate. Будущие задачи расширят схему
 настройками DataLoader, strategy-specific секциями, reporting settings, CLI
@@ -345,6 +355,14 @@ r_t = mid + beta * (microprice - mid) - q * gamma * sigma^2 * (T - t)
 table является stretch goal и должен оставаться в roadmap, если не будет
 реализован отдельной задачей.
 
+Реализация T11 переиспользует `AvellanedaStoikovStrategy` с режимом
+`FairPriceMode::MicropriceProxy`:
+
+- `microprice_proxy = mid + microprice_alpha * (spread / 2) * imbalance`;
+- `fair_price = mid + microprice_beta * (microprice_proxy - mid)`;
+- при `microprice_beta = 0` стратегия численно совпадает с classic A-S на том
+  же потоке состояний.
+
 ## 7. Build, Test, Run
 
 Из корня репозитория:
@@ -356,6 +374,7 @@ ctest --test-dir build --output-on-failure
 ./build/lob_backtest --config lob_backtester/configs/example.yaml
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
 ./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
+./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml
 ```
 
 Проверка форматирования:
@@ -428,8 +447,8 @@ data используется для integration и throughput checks после
 
 Ближайшие задачи:
 
-1. T11: добавить microprice extension.
-2. T12-T14: CLI/config polish, dashboard, эксперименты, отчет и финальная
+1. T12: CLI/config polish.
+2. T13-T14: dashboard, эксперименты, отчет и финальная
    полировка.
 
 Финальные deliverables:

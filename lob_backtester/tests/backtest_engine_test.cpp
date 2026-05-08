@@ -207,6 +207,14 @@ lob::strategies::AvellanedaStoikovStrategyConfig avellaneda_strategy_config() {
   return config;
 }
 
+lob::strategies::AvellanedaStoikovStrategyConfig microprice_as_strategy_config() {
+  auto config = avellaneda_strategy_config();
+  config.fair_price_mode = lob::strategies::FairPriceMode::MicropriceProxy;
+  config.microprice_alpha = 1.0;
+  config.microprice_beta = 1.0;
+  return config;
+}
+
 } // namespace
 
 TEST(BacktestEngineTest, RunsSyntheticStreamThroughOrdersFillsPortfolioMetricsAndArtifacts) {
@@ -403,6 +411,41 @@ TEST(BacktestEngineIntegrationTest, AvellanedaStoikovSampleRunWritesFiniteMetric
   lob::strategies::AvellanedaStoikovStrategy strategy(avellaneda_strategy_config());
   auto config = default_engine_config();
   const auto output_dir = make_temp_dir("lob_avellaneda_stoikov_sample");
+  config.book.max_depth = 50;
+  config.orders.risk.max_inventory_lots = 10;
+  config.orders.risk.strict_maker = true;
+  config.quote_refresh_ns = 100'000'000;
+  config.output_dir = output_dir;
+
+  const lob::engine::BacktestResult result =
+      lob::engine::BacktestEngine(config).run(source, strategy);
+
+  EXPECT_EQ(result.event_counts.total(), 757667U);
+  EXPECT_GT(result.order_event_count, 0U);
+  EXPECT_TRUE(std::isfinite(result.metrics.final_pnl));
+  EXPECT_TRUE(std::isfinite(result.metrics.mean_inventory));
+  EXPECT_TRUE(std::isfinite(result.metrics.inventory_std));
+  EXPECT_TRUE(std::isfinite(result.metrics.fill_rate));
+  EXPECT_TRUE(std::isfinite(result.metrics.max_drawdown));
+  EXPECT_TRUE(std::isfinite(result.metrics.avg_quoted_spread));
+  EXPECT_TRUE(std::isfinite(result.metrics.avg_spread_captured));
+  EXPECT_TRUE(std::isfinite(result.metrics.quote_uptime));
+  EXPECT_TRUE(std::filesystem::exists(output_dir / "metrics.json"));
+  EXPECT_TRUE(std::filesystem::exists(output_dir / "orders.csv"));
+  EXPECT_TRUE(std::filesystem::exists(output_dir / "fills.csv"));
+  EXPECT_NE(read_file(output_dir / "metrics.json").find("\"final_pnl\""), std::string::npos);
+  std::filesystem::remove_all(output_dir);
+}
+
+TEST(BacktestEngineIntegrationTest, MicropriceAsSampleRunWritesFiniteMetricsAndArtifacts) {
+  const auto data_dir = std::filesystem::path(LOB_TEST_DATA_DIR);
+  ASSERT_TRUE(std::filesystem::exists(data_dir / "lob.csv"));
+  ASSERT_TRUE(std::filesystem::exists(data_dir / "trades.csv"));
+
+  lob::data::CsvDataSource source(lob::data::csv_config_from_directory(data_dir, 0.0000001, 1.0));
+  lob::strategies::AvellanedaStoikovStrategy strategy(microprice_as_strategy_config());
+  auto config = default_engine_config();
+  const auto output_dir = make_temp_dir("lob_microprice_as_sample");
   config.book.max_depth = 50;
   config.orders.risk.max_inventory_lots = 10;
   config.orders.risk.strict_maker = true;

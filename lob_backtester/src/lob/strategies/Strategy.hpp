@@ -66,6 +66,11 @@ private:
   FixedSpreadStrategyConfig config_;
 };
 
+enum class FairPriceMode {
+  Mid,
+  MicropriceProxy,
+};
+
 struct AvellanedaStoikovStrategyConfig {
   execution::StrategyId strategy_id = 1;
   double gamma = 0.0;
@@ -76,6 +81,9 @@ struct AvellanedaStoikovStrategyConfig {
   book::Price min_spread_ticks = 1;
   execution::Quantity order_quantity_lots = 1;
   execution::Quantity max_inventory_lots = 1;
+  FairPriceMode fair_price_mode = FairPriceMode::Mid;
+  double microprice_alpha = 0.0;
+  double microprice_beta = 0.0;
 };
 
 struct AvellanedaStoikovQuote {
@@ -86,9 +94,12 @@ struct AvellanedaStoikovQuote {
 };
 
 [[nodiscard]] AvellanedaStoikovQuote
-compute_avellaneda_stoikov_quote(double mid_price, execution::Quantity inventory_lots, double gamma,
-                                 double sigma, double k, double remaining_horizon_seconds,
-                                 book::Price min_spread_ticks);
+compute_avellaneda_stoikov_quote(double fair_price, execution::Quantity inventory_lots,
+                                 double gamma, double sigma, double k,
+                                 double remaining_horizon_seconds, book::Price min_spread_ticks);
+
+[[nodiscard]] double compute_microprice_adjusted_fair_price(double mid_price,
+                                                            double microprice_proxy, double beta);
 
 class AvellanedaStoikovStrategy final : public IStrategy {
 public:

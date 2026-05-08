@@ -1,0 +1,33 @@
+run:
+  symbol: MD
+  input_path: data/sample
+  output_dir: lob_backtester/artifacts/runs/microprice_as
+
+market:
+  tick_size: 0.0000001
+  lot_size: 1.0
+
+book:
+  max_depth: 50
+
+execution:
+  fill_model: price_cross
+  fill_reference: trade_price
+  partial_fills: false
+  maker_bps: 0.0
+  taker_bps: 0.0
+
+strategy:
+  name: microprice_as
+  gamma: 0.01
+  sigma: 1.0
+  k: 1.0
+  horizon_seconds: 3600.0
+  sigma_window_ms: 1000
+  min_spread_ticks: 2
+  fair_price_mode: microprice_proxy
+  microprice_alpha: 1.0
+  microprice_beta: 1.0
+  order_qty: 1
+  max_inventory: 10
+  quote_refresh_ms: 100

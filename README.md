@@ -34,14 +34,18 @@ Implemented:
 - Avellaneda-Stoikov strategy with formula tests, rolling mid-return
   volatility, inventory guard, maker-only validation, YAML config, and sample
   artifact smoke coverage.
+- Microprice-adjusted Avellaneda-Stoikov mode with configurable
+  `fair_price_mode`, `microprice_alpha`, `microprice_beta`, formula tests,
+  beta-zero equivalence coverage, YAML config, and sample artifact smoke
+  coverage.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
   k-way merge, sample replay, order-book invariants, feature formulas, OMS
   lifecycle/fill rules, portfolio accounting, run metrics, engine integration,
-  look-ahead protection, fixed-spread and Avellaneda-Stoikov strategy behavior,
-  and sample replay throughput.
+  look-ahead protection, fixed-spread, Avellaneda-Stoikov, microprice A-S
+  strategy behavior, and sample replay throughput.
 
-Next planned task: T11, Microprice extension.
+Next planned task: T12, CLI and configuration polish.
 
 ## Repository Layout
 
@@ -105,6 +109,7 @@ The CLI runs the configured CSV replay and writes run artifacts to
 ```bash
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
 ./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
+./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml
 ```
 
 ## Data

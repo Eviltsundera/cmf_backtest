@@ -57,6 +57,24 @@ bool is_avellaneda_stoikov_strategy(const std::string_view name) {
   return name == "avellaneda_stoikov" || name == "avellaneda" || name == "as";
 }
 
+bool is_microprice_as_strategy(const std::string_view name) {
+  return name == "microprice_as" || name == "microprice_avellaneda_stoikov" || name == "mp_as";
+}
+
+bool is_avellaneda_stoikov_family(const std::string_view name) {
+  return is_avellaneda_stoikov_strategy(name) || is_microprice_as_strategy(name);
+}
+
+lob::strategies::FairPriceMode parse_fair_price_mode(const std::string_view value) {
+  if (value == "mid" || value == "classic") {
+    return lob::strategies::FairPriceMode::Mid;
+  }
+  if (value == "microprice_proxy" || value == "microprice") {
+    return lob::strategies::FairPriceMode::MicropriceProxy;
+  }
+  throw std::runtime_error("Unsupported fair_price_mode: " + std::string(value));
+}
+
 std::int64_t milliseconds_to_nanoseconds(const std::int64_t milliseconds) {
   constexpr std::int64_t kNsPerMs = 1'000'000;
   if (milliseconds > std::numeric_limits<std::int64_t>::max() / kNsPerMs ||
@@ -84,7 +102,7 @@ engine_config_from_app_config(const lob::utils::AppConfig &config) {
     engine_config.orders.risk.max_inventory_lots = config.strategy.max_inventory;
   }
   if (is_fixed_spread_strategy(config.strategy.name) ||
-      is_avellaneda_stoikov_strategy(config.strategy.name)) {
+      is_avellaneda_stoikov_family(config.strategy.name)) {
     engine_config.orders.risk.strict_maker = true;
   }
   return engine_config;
@@ -103,7 +121,11 @@ make_strategy(const lob::utils::StrategyConfig &config) {
     strategy_config.max_inventory_lots = config.max_inventory;
     return std::make_unique<lob::strategies::FixedSpreadStrategy>(strategy_config);
   }
-  if (is_avellaneda_stoikov_strategy(name)) {
+  if (is_avellaneda_stoikov_family(name)) {
+    if (is_microprice_as_strategy(name) && !config.has_fair_price_mode) {
+      throw std::runtime_error("microprice_as strategy requires fair_price_mode");
+    }
+
     lob::strategies::AvellanedaStoikovStrategyConfig strategy_config;
     strategy_config.gamma = config.gamma;
     strategy_config.initial_sigma = config.sigma;
@@ -113,6 +135,19 @@ make_strategy(const lob::utils::StrategyConfig &config) {
     strategy_config.min_spread_ticks = config.min_spread_ticks;
     strategy_config.order_quantity_lots = config.order_qty;
     strategy_config.max_inventory_lots = config.max_inventory;
+    strategy_config.fair_price_mode = parse_fair_price_mode(config.fair_price_mode);
+    strategy_config.microprice_alpha = config.microprice_alpha;
+    strategy_config.microprice_beta = config.microprice_beta;
+    if (strategy_config.fair_price_mode == lob::strategies::FairPriceMode::MicropriceProxy) {
+      if (!config.has_microprice_alpha || !config.has_microprice_beta) {
+        throw std::runtime_error(
+            "microprice fair_price_mode requires microprice_alpha and microprice_beta");
+      }
+    }
+    if (is_microprice_as_strategy(name) &&
+        strategy_config.fair_price_mode != lob::strategies::FairPriceMode::MicropriceProxy) {
+      throw std::runtime_error("microprice_as strategy requires fair_price_mode: microprice_proxy");
+    }
     return std::make_unique<lob::strategies::AvellanedaStoikovStrategy>(strategy_config);
   }
   throw std::runtime_error("Strategy is not implemented yet: " + std::string(name));

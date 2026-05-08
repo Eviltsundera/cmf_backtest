@@ -73,6 +73,63 @@ double population_std(const std::size_t count, const long double sum,
   return std::sqrt(static_cast<double>(variance));
 }
 
+bool is_positive_finite_price(const double price) {
+  return std::isfinite(price) && price > 0.0;
+}
+
+std::optional<double> safe_microprice_adjusted_fair_price(const double mid_price,
+                                                          const double microprice_proxy,
+                                                          const double beta) {
+  if (!is_positive_finite_price(mid_price) || !is_positive_finite_price(microprice_proxy) ||
+      !std::isfinite(beta) || beta < 0.0) {
+    return std::nullopt;
+  }
+
+  const double fair_price = mid_price + (beta * (microprice_proxy - mid_price));
+  if (!is_positive_finite_price(fair_price)) {
+    return std::nullopt;
+  }
+  return fair_price;
+}
+
+std::optional<double> microprice_proxy_from_state(const MarketState &state, const double alpha) {
+  if (!state.mid_price || !is_positive_finite_price(*state.mid_price) || !state.spread_ticks ||
+      *state.spread_ticks <= 0 || !state.imbalance || !std::isfinite(*state.imbalance)) {
+    return std::nullopt;
+  }
+
+  const double proxy =
+      *state.mid_price +
+      (alpha * (static_cast<double>(*state.spread_ticks) / 2.0) * *state.imbalance);
+  if (!is_positive_finite_price(proxy)) {
+    return std::nullopt;
+  }
+  return proxy;
+}
+
+std::optional<double> fair_price_from_state(const MarketState &state,
+                                            const AvellanedaStoikovStrategyConfig &config) {
+  if (!state.mid_price || !is_positive_finite_price(*state.mid_price)) {
+    return std::nullopt;
+  }
+
+  if (config.fair_price_mode == FairPriceMode::Mid) {
+    return *state.mid_price;
+  }
+  if (config.fair_price_mode == FairPriceMode::MicropriceProxy) {
+    if (config.microprice_beta == 0.0) {
+      return *state.mid_price;
+    }
+    const auto proxy = microprice_proxy_from_state(state, config.microprice_alpha);
+    if (!proxy) {
+      return std::nullopt;
+    }
+    return safe_microprice_adjusted_fair_price(*state.mid_price, *proxy, config.microprice_beta);
+  }
+
+  throw std::runtime_error("Unsupported AvellanedaStoikov fair_price_mode");
+}
+
 } // namespace
 
 std::vector<execution::OrderIntent> NoopStrategy::on_market_event(const data::MarketEvent &,
@@ -131,14 +188,14 @@ std::vector<execution::OrderIntent> FixedSpreadStrategy::on_fill(const execution
   return {};
 }
 
-AvellanedaStoikovQuote compute_avellaneda_stoikov_quote(const double mid_price,
+AvellanedaStoikovQuote compute_avellaneda_stoikov_quote(const double fair_price,
                                                         const execution::Quantity inventory_lots,
                                                         const double gamma, const double sigma,
                                                         const double k,
                                                         const double remaining_horizon_seconds,
                                                         const book::Price min_spread_ticks) {
-  if (!std::isfinite(mid_price) || mid_price <= 0.0) {
-    throw std::runtime_error("AvellanedaStoikov mid_price must be positive and finite");
+  if (!is_positive_finite_price(fair_price)) {
+    throw std::runtime_error("AvellanedaStoikov fair_price must be positive and finite");
   }
   if (!std::isfinite(gamma) || gamma <= 0.0) {
     throw std::runtime_error("AvellanedaStoikov gamma must be positive and finite");
@@ -159,7 +216,7 @@ AvellanedaStoikovQuote compute_avellaneda_stoikov_quote(const double mid_price,
   const double sigma_squared = sigma * sigma;
   const double inventory_risk = gamma * sigma_squared * remaining_horizon_seconds;
   const double reservation_price =
-      mid_price - (static_cast<double>(inventory_lots) * inventory_risk);
+      fair_price - (static_cast<double>(inventory_lots) * inventory_risk);
   const double liquidity_spread = (2.0 / gamma) * std::log1p(gamma / k);
   const double model_spread = inventory_risk + liquidity_spread;
   if (!std::isfinite(reservation_price) || !std::isfinite(model_spread)) {
@@ -173,6 +230,16 @@ AvellanedaStoikovQuote compute_avellaneda_stoikov_quote(const double mid_price,
   quote.bid_price = round_down_price(reservation_price - (total_spread / 2.0));
   quote.ask_price = round_up_price(reservation_price + (total_spread / 2.0));
   return quote;
+}
+
+double compute_microprice_adjusted_fair_price(const double mid_price, const double microprice_proxy,
+                                              const double beta) {
+  const auto fair_price = safe_microprice_adjusted_fair_price(mid_price, microprice_proxy, beta);
+  if (!fair_price) {
+    throw std::runtime_error(
+        "Microprice fair price inputs must be positive, finite, and have non-negative beta");
+  }
+  return *fair_price;
 }
 
 AvellanedaStoikovStrategy::AvellanedaStoikovStrategy(AvellanedaStoikovStrategyConfig config)
@@ -201,6 +268,14 @@ AvellanedaStoikovStrategy::AvellanedaStoikovStrategy(AvellanedaStoikovStrategyCo
   if (config_.min_spread_ticks <= 0) {
     throw std::runtime_error("AvellanedaStoikovStrategy min_spread_ticks must be positive");
   }
+  if (!std::isfinite(config_.microprice_alpha) || config_.microprice_alpha < 0.0) {
+    throw std::runtime_error(
+        "AvellanedaStoikovStrategy microprice_alpha must be non-negative and finite");
+  }
+  if (!std::isfinite(config_.microprice_beta) || config_.microprice_beta < 0.0) {
+    throw std::runtime_error(
+        "AvellanedaStoikovStrategy microprice_beta must be non-negative and finite");
+  }
   validate_order_sizing(config_.order_quantity_lots, config_.max_inventory_lots,
                         "AvellanedaStoikovStrategy");
 }
@@ -216,10 +291,15 @@ AvellanedaStoikovStrategy::on_market_event(const data::MarketEvent &event,
     return intents;
   }
 
+  const auto fair_price = fair_price_from_state(state, config_);
+  if (!fair_price) {
+    return intents;
+  }
+
   push_mid_return_std(event.ts_ns, *state.mid_price);
   const AvellanedaStoikovQuote quote = compute_avellaneda_stoikov_quote(
-      *state.mid_price, state.inventory_lots, config_.gamma, current_sigma(*state.mid_price),
-      config_.k, remaining_horizon_seconds(event.ts_ns), config_.min_spread_ticks);
+      *fair_price, state.inventory_lots, config_.gamma, current_sigma(*state.mid_price), config_.k,
+      remaining_horizon_seconds(event.ts_ns), config_.min_spread_ticks);
 
   if (quote.bid_price <= 0 || quote.ask_price <= 0 || quote.bid_price >= quote.ask_price) {
     return intents;

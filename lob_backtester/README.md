@@ -41,12 +41,13 @@ artifacts to `run.output_dir`. Strategy configs are:
 ```bash
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
 ./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
+./build/lob_backtest --config lob_backtester/configs/microprice_as.yaml
 ```
 
 Implemented engine modules currently include DataLoader, Market-By-Price
 OrderBook, FeatureEngine, Strategy interface, OrderManager, FillModel,
 Portfolio, MetricsEngine, BacktestEngine, NoopStrategy, FixedSpreadStrategy,
-and AvellanedaStoikovStrategy.
+AvellanedaStoikovStrategy, and the microprice-adjusted A-S fair-price mode.
 
 ## Documentation
 

@@ -66,7 +66,7 @@ find lob_backtester/apps lob_backtester/src lob_backtester/tests -name '*.cpp' -
 
 T0 bootstrap, T1 data audit, T2 DataLoader, T3 LOBBuilder, T4 FeatureEngine,
 T5 OMS, T6 FillModel, T7 Portfolio/MetricsEngine, T8 Engine integration, T9
-FixedSpreadStrategy и T10 AvellanedaStoikovStrategy
+FixedSpreadStrategy, T10 AvellanedaStoikovStrategy и T11 Microprice extension
 закрыты. Сейчас в
 репозитории есть:
 
@@ -80,12 +80,14 @@ FixedSpreadStrategy и T10 AvellanedaStoikovStrategy
 - MetricsEngine и вывод `metrics.json`, `equity_curve.csv`, `inventory.csv` в
   `lob::metrics`.
 - Strategy interface, `NoopStrategy`, `FixedSpreadStrategy`,
-  `AvellanedaStoikovStrategy` и `BacktestEngine` event loop в
+  `AvellanedaStoikovStrategy` с classic/microprice fair-price modes и
+  `BacktestEngine` event loop в
   `lob::strategies`/`lob::engine`.
 - CLI replay path: `lob_backtest --config <yaml>` с `strategy.name: noop`,
-  `fixed_spread` или `avellaneda_stoikov`.
+  `fixed_spread`, `avellaneda_stoikov` или `microprice_as`.
 - Baseline configs: `lob_backtester/configs/baseline_fixed_spread.yaml`,
-  `lob_backtester/configs/avellaneda_stoikov.yaml`.
+  `lob_backtester/configs/avellaneda_stoikov.yaml`,
+  `lob_backtester/configs/microprice_as.yaml`.
 - Run artifacts: `metrics.json`, `equity_curve.csv`, `inventory.csv`,
   `orders.csv`, `fills.csv`.
 - Example config, config smoke test и DataLoader tests.
@@ -93,4 +95,4 @@ FixedSpreadStrategy и T10 AvellanedaStoikovStrategy
 - `lob_backtester/scripts/python/audit.py` для аудита raw CSV и регенерации
   `data/sample/`.
 
-Следующая задача по плану: T11, Microprice extension.
+Следующая задача по плану: T12, CLI и конфигурация.

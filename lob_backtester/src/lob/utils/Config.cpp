@@ -61,6 +61,15 @@ AppConfig load_config(const std::filesystem::path &path) {
       strategy["sigma_window_ms"] ? strategy["sigma_window_ms"].as<std::int64_t>() : 0;
   config.strategy.min_spread_ticks =
       strategy["min_spread_ticks"] ? strategy["min_spread_ticks"].as<std::int64_t>() : 0;
+  config.strategy.has_fair_price_mode = static_cast<bool>(strategy["fair_price_mode"]);
+  config.strategy.fair_price_mode =
+      strategy["fair_price_mode"] ? strategy["fair_price_mode"].as<std::string>() : "mid";
+  config.strategy.has_microprice_alpha = static_cast<bool>(strategy["microprice_alpha"]);
+  config.strategy.microprice_alpha =
+      strategy["microprice_alpha"] ? strategy["microprice_alpha"].as<double>() : 0.0;
+  config.strategy.has_microprice_beta = static_cast<bool>(strategy["microprice_beta"]);
+  config.strategy.microprice_beta =
+      strategy["microprice_beta"] ? strategy["microprice_beta"].as<double>() : 0.0;
   config.strategy.delta_ticks =
       strategy["delta_ticks"] ? strategy["delta_ticks"].as<std::int64_t>() : 0;
   config.strategy.order_qty = strategy["order_qty"] ? strategy["order_qty"].as<std::int64_t>() : 0;
@@ -92,6 +101,9 @@ std::string describe_config(const AppConfig &config) {
   out << "horizon_seconds=" << config.strategy.horizon_seconds << '\n';
   out << "sigma_window_ms=" << config.strategy.sigma_window_ms << '\n';
   out << "min_spread_ticks=" << config.strategy.min_spread_ticks << '\n';
+  out << "fair_price_mode=" << config.strategy.fair_price_mode << '\n';
+  out << "microprice_alpha=" << config.strategy.microprice_alpha << '\n';
+  out << "microprice_beta=" << config.strategy.microprice_beta << '\n';
   out << "delta_ticks=" << config.strategy.delta_ticks << '\n';
   out << "order_qty=" << config.strategy.order_qty << '\n';
   out << "max_inventory=" << config.strategy.max_inventory << '\n';

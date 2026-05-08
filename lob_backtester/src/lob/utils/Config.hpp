@@ -37,6 +37,12 @@ struct StrategyConfig {
   double horizon_seconds = 0.0;
   std::int64_t sigma_window_ms = 0;
   std::int64_t min_spread_ticks = 0;
+  std::string fair_price_mode = "mid";
+  bool has_fair_price_mode = false;
+  double microprice_alpha = 0.0;
+  bool has_microprice_alpha = false;
+  double microprice_beta = 0.0;
+  bool has_microprice_beta = false;
   std::int64_t delta_ticks = 0;
   std::int64_t order_qty = 0;
   std::int64_t max_inventory = 0;

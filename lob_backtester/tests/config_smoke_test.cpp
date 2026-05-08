@@ -43,3 +43,20 @@ TEST(ConfigSmokeTest, LoadsAvellanedaStoikovConfig) {
   EXPECT_EQ(config.run.output_dir,
             std::filesystem::path("lob_backtester/artifacts/runs/avellaneda_stoikov"));
 }
+
+TEST(ConfigSmokeTest, LoadsMicropriceAsConfig) {
+  const auto path = std::filesystem::path(LOB_TEST_CONFIG_DIR) / "microprice_as.yaml";
+  const lob::utils::AppConfig config = lob::utils::load_config(path);
+
+  EXPECT_EQ(config.strategy.name, "microprice_as");
+  EXPECT_EQ(config.strategy.fair_price_mode, "microprice_proxy");
+  EXPECT_TRUE(config.strategy.has_fair_price_mode);
+  EXPECT_TRUE(config.strategy.has_microprice_alpha);
+  EXPECT_TRUE(config.strategy.has_microprice_beta);
+  EXPECT_GT(config.strategy.microprice_alpha, 0.0);
+  EXPECT_GT(config.strategy.microprice_beta, 0.0);
+  EXPECT_EQ(config.strategy.order_qty, 1);
+  EXPECT_EQ(config.strategy.max_inventory, 10);
+  EXPECT_EQ(config.run.output_dir,
+            std::filesystem::path("lob_backtester/artifacts/runs/microprice_as"));
+}
