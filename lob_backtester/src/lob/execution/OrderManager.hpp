@@ -136,8 +136,9 @@ private:
   [[nodiscard]] std::string validate_submit(OrderSide side, Price price_ticks,
                                             Quantity quantity_lots, const book::OrderBook *book,
                                             Quantity current_inventory_lots) const;
-  [[nodiscard]] Quantity projected_inventory_after_fill(OrderSide side, Quantity quantity_lots,
-                                                        Quantity current_inventory_lots) const;
+  [[nodiscard]] Quantity active_remaining_lots(OrderSide side) const;
+  [[nodiscard]] Quantity worst_case_inventory_after_fill(OrderSide side, Quantity quantity_lots,
+                                                         Quantity current_inventory_lots) const;
   void append_event(std::int64_t ts_ns, OrderLifecycleEventType event_type, const Order &order,
                     std::optional<OrderId> related_order_id = std::nullopt,
                     std::string reason = {});

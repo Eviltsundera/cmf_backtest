@@ -84,6 +84,21 @@ TEST(OrderManagerTest, RejectsWhenMaxInventoryWouldBeExceeded) {
             lob::execution::OrderLifecycleEventType::Rejected);
 }
 
+TEST(OrderManagerTest, RejectsWorstCaseSameSideActiveFillsWithoutNettingOppositeSide) {
+  lob::execution::OrderManager manager(risk_config());
+
+  const auto &buy = manager.submit_limit(7, lob::execution::OrderSide::Buy, 98, 6, 1000);
+  const auto &sell = manager.submit_limit(7, lob::execution::OrderSide::Sell, 102, 6, 1001);
+  ASSERT_EQ(buy.status, lob::execution::OrderStatus::Active);
+  ASSERT_EQ(sell.status, lob::execution::OrderStatus::Active);
+
+  const auto &new_buy = manager.submit_limit(7, lob::execution::OrderSide::Buy, 97, 10, 1002);
+
+  EXPECT_EQ(new_buy.status, lob::execution::OrderStatus::Rejected);
+  EXPECT_EQ(new_buy.reject_reason, "max_inventory exceeded");
+  EXPECT_EQ(manager.active_count(), 2U);
+}
+
 TEST(OrderManagerTest, ReplaceCancelsOldOrderAndSubmitsNewId) {
   lob::execution::OrderManager manager(risk_config());
   const auto &old_order = manager.submit_limit(7, lob::execution::OrderSide::Sell, 102, 3, 1000);
@@ -135,6 +150,17 @@ TEST(OrderManagerTest, RiskGatesRejectBadTicksMinQtyAndStrictMakerCrossing) {
       manager.submit_limit(7, lob::execution::OrderSide::Buy, 105, 1, 1002, &book);
   EXPECT_EQ(crossing.status, lob::execution::OrderStatus::Rejected);
   EXPECT_EQ(crossing.reject_reason, "strict_maker buy crosses best ask");
+}
+
+TEST(OrderManagerTest, StrictMakerRejectsWhenBookIsMissing) {
+  auto config = risk_config();
+  config.risk.strict_maker = true;
+  lob::execution::OrderManager manager(config);
+
+  const auto &order = manager.submit_limit(7, lob::execution::OrderSide::Buy, 100, 1, 1000);
+
+  EXPECT_EQ(order.status, lob::execution::OrderStatus::Rejected);
+  EXPECT_EQ(order.reject_reason, "strict_maker requires order book");
 }
 
 TEST(OrderManagerTest, ProcessIntentSupportsCancelAllAndWritesCsvLifecycleLog) {

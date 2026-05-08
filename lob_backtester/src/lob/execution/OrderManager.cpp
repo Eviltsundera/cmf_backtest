@@ -320,12 +320,19 @@ std::string OrderManager::validate_submit(const OrderSide side, const Price pric
   if (price_ticks % config_.risk.price_tick_multiple != 0) {
     return "price is not tick aligned";
   }
-  if (abs_quantity(projected_inventory_after_fill(side, quantity_lots, current_inventory_lots)) >
+  if (abs_quantity(current_inventory_lots) > config_.risk.max_inventory_lots) {
+    return "current inventory exceeds max_inventory";
+  }
+  if (abs_quantity(worst_case_inventory_after_fill(side, quantity_lots, current_inventory_lots)) >
       config_.risk.max_inventory_lots) {
     return "max_inventory exceeded";
   }
 
-  if (config_.risk.strict_maker && book != nullptr) {
+  if (config_.risk.strict_maker && book == nullptr) {
+    return "strict_maker requires order book";
+  }
+
+  if (config_.risk.strict_maker) {
     if (side == OrderSide::Buy) {
       const auto best_ask = book->best_ask();
       if (best_ask && price_ticks >= best_ask->price_ticks) {
@@ -342,10 +349,22 @@ std::string OrderManager::validate_submit(const OrderSide side, const Price pric
   return {};
 }
 
-Quantity OrderManager::projected_inventory_after_fill(const OrderSide side,
-                                                      const Quantity quantity_lots,
-                                                      const Quantity current_inventory_lots) const {
-  return current_inventory_lots + active_exposure_lots() + signed_quantity(side, quantity_lots);
+Quantity OrderManager::active_remaining_lots(const OrderSide side) const {
+  Quantity remaining_lots = 0;
+  for (const OrderId order_id : active_order_ids_) {
+    const auto it = orders_.find(order_id);
+    if (it != orders_.end() && it->second.side == side) {
+      remaining_lots += it->second.remaining_lots;
+    }
+  }
+  return remaining_lots;
+}
+
+Quantity
+OrderManager::worst_case_inventory_after_fill(const OrderSide side, const Quantity quantity_lots,
+                                              const Quantity current_inventory_lots) const {
+  return current_inventory_lots + signed_quantity(side, active_remaining_lots(side)) +
+         signed_quantity(side, quantity_lots);
 }
 
 void OrderManager::append_event(const std::int64_t ts_ns, const OrderLifecycleEventType event_type,
