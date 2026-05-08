@@ -124,6 +124,57 @@ public:
   std::vector<double> mids;
 };
 
+class ReplacingAfterBatchFillStrategy final : public lob::strategies::IStrategy {
+public:
+  std::vector<lob::execution::OrderIntent>
+  on_market_event(const lob::data::MarketEvent &event,
+                  const lob::strategies::MarketState &) override {
+    if (quoted_) {
+      return {};
+    }
+    quoted_ = true;
+    return {
+        lob::execution::OrderIntent::submit_limit(1, lob::execution::OrderSide::Buy, 99, 1,
+                                                  event.ts_ns),
+        lob::execution::OrderIntent::submit_limit(1, lob::execution::OrderSide::Buy, 99, 1,
+                                                  event.ts_ns),
+    };
+  }
+
+  std::vector<lob::execution::OrderIntent>
+  on_fill(const lob::execution::Fill &, const lob::strategies::MarketState &state) override {
+    fill_callback_inventories.push_back(state.inventory_lots);
+    return {lob::execution::OrderIntent::submit_limit(1, lob::execution::OrderSide::Buy, 99, 1,
+                                                      state.ts_ns)};
+  }
+
+  std::vector<lob::execution::Quantity> fill_callback_inventories;
+
+private:
+  bool quoted_ = false;
+};
+
+class ReplaceOnceStrategy final : public lob::strategies::IStrategy {
+public:
+  std::vector<lob::execution::OrderIntent>
+  on_market_event(const lob::data::MarketEvent &event,
+                  const lob::strategies::MarketState &) override {
+    if (event.seq == 1) {
+      return {lob::execution::OrderIntent::submit_limit(1, lob::execution::OrderSide::Buy, 98, 1,
+                                                        event.ts_ns)};
+    }
+    if (event.seq == 2) {
+      return {lob::execution::OrderIntent::replace(1, 99, 1, event.ts_ns)};
+    }
+    return {};
+  }
+
+  std::vector<lob::execution::OrderIntent> on_fill(const lob::execution::Fill &,
+                                                   const lob::strategies::MarketState &) override {
+    return {};
+  }
+};
+
 lob::engine::BacktestEngineConfig default_engine_config() {
   lob::engine::BacktestEngineConfig config;
   config.book.max_depth = 10;
@@ -173,6 +224,47 @@ TEST(BacktestEngineTest, RunsSyntheticStreamThroughOrdersFillsPortfolioMetricsAn
             0U);
   EXPECT_EQ(read_file(output_dir / "inventory.csv").find("ts_ns,position_lots"), 0U);
   std::filesystem::remove_all(output_dir);
+}
+
+TEST(BacktestEngineTest, AppliesSameEventFillBatchBeforeFillCallbacks) {
+  VectorDataSource source({
+      snapshot_event(1'000, 1, 99, 10, 101, 10),
+      trade_event(2'000, 2, lob::data::TradeSide::Sell, 99),
+  });
+  ReplacingAfterBatchFillStrategy strategy;
+
+  auto config = default_engine_config();
+  config.orders.risk.max_inventory_lots = 2;
+  config.quote_refresh_ns = 0;
+
+  const lob::engine::BacktestResult result =
+      lob::engine::BacktestEngine(config).run(source, strategy);
+
+  EXPECT_EQ(result.fill_count, 2U);
+  EXPECT_EQ(result.portfolio.position_lots(), 2);
+  EXPECT_EQ(result.active_order_count, 0U);
+  ASSERT_EQ(strategy.fill_callback_inventories.size(), 2U);
+  EXPECT_EQ(strategy.fill_callback_inventories[0], 2);
+  EXPECT_EQ(strategy.fill_callback_inventories[1], 2);
+}
+
+TEST(BacktestEngineTest, CountsAcceptedReplaceAsFillOpportunity) {
+  VectorDataSource source({
+      snapshot_event(1'000, 1, 99, 10, 101, 10),
+      snapshot_event(2'000, 2, 99, 10, 101, 10),
+      trade_event(3'000, 3, lob::data::TradeSide::Sell, 99),
+  });
+  ReplaceOnceStrategy strategy;
+
+  auto config = default_engine_config();
+  config.quote_refresh_ns = 0;
+
+  const lob::engine::BacktestResult result =
+      lob::engine::BacktestEngine(config).run(source, strategy);
+
+  EXPECT_EQ(result.fill_count, 1U);
+  EXPECT_EQ(result.metrics.fill_count, 1U);
+  EXPECT_DOUBLE_EQ(result.metrics.fill_rate, 0.5);
 }
 
 TEST(BacktestEngineTest, StrategySeesOnlyCurrentAppliedMarketState) {

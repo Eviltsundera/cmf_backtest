@@ -69,7 +69,9 @@ void process_intents(const std::vector<execution::OrderIntent> &intents,
   for (const execution::OrderIntent &intent : intents) {
     const execution::OrderIntentResult result =
         orders.process_intent(intent, &book, portfolio.position_lots());
-    if (intent.type == execution::OrderIntentType::SubmitLimit && result.accepted) {
+    const bool submits_new_order = intent.type == execution::OrderIntentType::SubmitLimit ||
+                                   intent.type == execution::OrderIntentType::Replace;
+    if (submits_new_order && result.accepted) {
       metrics.record_fill_opportunity();
     }
   }
@@ -116,7 +118,9 @@ BacktestResult BacktestEngine::run(data::IDataSource &source,
       portfolio.apply_fill(fill);
       metrics.record_fill(fill, book.mid());
       all_fills.push_back(fill);
+    }
 
+    for (const execution::Fill &fill : fills) {
       const strategies::MarketState fill_state = make_market_state(event, book, orders, portfolio);
       process_intents(strategy.on_fill(fill, fill_state), orders, book, portfolio, metrics);
     }
