@@ -57,6 +57,9 @@ FixedSpreadStrategy::FixedSpreadStrategy(FixedSpreadStrategyConfig config) : con
   if (config_.max_inventory_lots < 0) {
     throw std::runtime_error("FixedSpreadStrategy max_inventory must be non-negative");
   }
+  if (config_.max_inventory_lots < config_.order_quantity_lots) {
+    throw std::runtime_error("FixedSpreadStrategy max_inventory must be >= order_qty");
+  }
 }
 
 std::vector<execution::OrderIntent>

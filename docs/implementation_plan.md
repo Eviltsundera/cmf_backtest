@@ -393,6 +393,8 @@ strategy через `on_fill`, вызывает `on_market_event` по `quote_re
 сторон. CLI поддерживает `strategy.name: fixed_spread`, config
 `lob_backtester/configs/baseline_fixed_spread.yaml` запускает sample replay и
 пишет артефакты в ignored run directory.
+Review fix: fixed-spread config rejects `max_inventory < order_qty`, including
+the omitted-key default `max_inventory=0`, so a bad baseline run fails fast.
 
 Проверено: `cmake --build build -j2`,
 `./build/lob_tests --gtest_filter='FixedSpreadStrategyTest.*' --gtest_color=no`,

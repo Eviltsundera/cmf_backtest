@@ -82,4 +82,8 @@ TEST(FixedSpreadStrategyTest, RejectsInvalidConfig) {
   config = fixed_spread_config();
   config.max_inventory_lots = -1;
   EXPECT_THROW(static_cast<void>(lob::strategies::FixedSpreadStrategy{config}), std::runtime_error);
+
+  config = fixed_spread_config();
+  config.max_inventory_lots = config.order_quantity_lots - 1;
+  EXPECT_THROW(static_cast<void>(lob::strategies::FixedSpreadStrategy{config}), std::runtime_error);
 }
