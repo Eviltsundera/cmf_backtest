@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -256,6 +257,36 @@ TEST(BacktestEngineTest, RunsSyntheticStreamThroughOrdersFillsPortfolioMetricsAn
             0U);
   EXPECT_EQ(read_file(output_dir / "inventory.csv").find("ts_ns,position_lots"), 0U);
   std::filesystem::remove_all(output_dir);
+}
+
+TEST(BacktestEngineTest, RecordsAdverseSelectionAtConfiguredHorizons) {
+  VectorDataSource source({
+      snapshot_event(1'000, 1, 99, 10, 101, 10),
+      trade_event(2'000, 2, lob::data::TradeSide::Sell, 99),
+      snapshot_event(3'000, 3, 101, 10, 103, 10),
+  });
+  FixedQuoteStrategy strategy;
+
+  auto config = default_engine_config();
+  config.adverse_selection_horizons_ns = {1'000};
+
+  const lob::engine::BacktestResult result =
+      lob::engine::BacktestEngine(config).run(source, strategy);
+
+  ASSERT_TRUE(result.metrics.adverse_selection_h.contains(1'000));
+  EXPECT_DOUBLE_EQ(result.metrics.adverse_selection_h.at(1'000), 3.0);
+}
+
+TEST(BacktestEngineTest, RejectsNonPositiveAdverseSelectionHorizons) {
+  auto config = default_engine_config();
+  config.adverse_selection_horizons_ns = {0};
+
+  EXPECT_THROW(
+      {
+        lob::engine::BacktestEngine engine(config);
+        (void)engine;
+      },
+      std::runtime_error);
 }
 
 TEST(BacktestEngineTest, FixedSpreadEarnsPositivePnlOnMeanRevertingSyntheticWithZeroFees) {

@@ -552,6 +552,8 @@ Static export пишет `summary.md` и `plots/*.png`; `kaleido` зафикси
 
 ## T14. Эксперименты и финальный отчёт
 
+**Статус:** done 2026-05-08.
+
 **Цель:** собрать результаты для сдачи.
 
 **Подзадачи:**
@@ -577,11 +579,18 @@ Static export пишет `summary.md` и `plots/*.png`; `kaleido` зафикси
   10. Инструкции по воспроизведению (commands).
 
 **DoD:**
-- [ ] Все 3+ прогона имеют артефакты в `reports/`.
-- [ ] Sensitivity grid заполнен, есть heatmap.
-- [ ] `cmf/docs/report.md` написан и содержит все 10 секций.
-- [ ] Microprice-A–S в среднем по grid не хуже A–S по net PnL ИЛИ зафиксировано почему хуже (с предположением о причинах).
-- [ ] README в [cmf/lob_backtester/](../lob_backtester/) обновлён: команды build, run, reproduce, ссылки на configs и отчёт.
+- [x] Все 3+ прогона имеют артефакты в `reports/`.
+- [x] Sensitivity grid заполнен, есть heatmap.
+- [x] `cmf/docs/report.md` написан и содержит все 10 секций.
+- [x] Microprice-A–S в среднем по grid не хуже A–S по net PnL ИЛИ зафиксировано почему хуже (с предположением о причинах).
+- [x] README в [cmf/lob_backtester/](../lob_backtester/) обновлён: команды build, run, reproduce, ссылки на configs и отчёт.
+
+**Итог:** добавлен `scripts/python/run_experiments.py`, который запускает
+baseline, A-S, microprice A-S и 27 grid-run'ов по `gamma/k/beta`, пишет
+`reports/experiment_manifest.json`, `reports/experiment_summary.md` и static
+sensitivity heatmaps. Финальный отчёт находится в [report.md](report.md);
+дополнительный runbook — в [experiments.md](experiments.md). Engine теперь
+записывает adverse-selection markout на горизонтах 1s и 10s.
 
 ---
 

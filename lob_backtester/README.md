@@ -79,10 +79,25 @@ Static Markdown/PNG export for one run:
 python scripts/python/export_static.py --run data/sample_reports/avellaneda_stoikov
 ```
 
+Reproduce the full experiment set from the repository root:
+
+```bash
+python3 scripts/python/run_experiments.py
+streamlit run scripts/python/dashboard.py -- --reports-dir reports/
+```
+
+To run the same configs against a local full dataset, pass an input override:
+
+```bash
+python3 scripts/python/run_experiments.py --input-path data/raw/MD
+```
+
 ## Documentation
 
 - [Implementation plan](../docs/implementation_plan.md)
 - [Technical documentation](../docs/technical_documentation.md)
+- [Experiments runbook](../docs/experiments.md)
+- [Final report](../docs/report.md)
 
 ## Format And Lint
 

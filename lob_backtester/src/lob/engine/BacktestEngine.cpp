@@ -5,7 +5,9 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <limits>
 #include <optional>
+#include <queue>
 #include <stdexcept>
 #include <utility>
 
@@ -19,12 +21,33 @@ struct ActiveQuotes {
   std::optional<double> ask;
 };
 
+struct PendingAdverseSelection {
+  execution::Fill fill;
+  std::int64_t horizon_ns = 0;
+  std::int64_t target_ts_ns = 0;
+};
+
+struct PendingAdverseSelectionDueFirst {
+  bool operator()(const PendingAdverseSelection &lhs, const PendingAdverseSelection &rhs) const {
+    return lhs.target_ts_ns > rhs.target_ts_ns;
+  }
+};
+
+using PendingAdverseSelectionQueue =
+    std::priority_queue<PendingAdverseSelection, std::vector<PendingAdverseSelection>,
+                        PendingAdverseSelectionDueFirst>;
+
 void validate_config(const BacktestEngineConfig &config) {
   if (!std::isfinite(config.initial_cash)) {
     throw std::runtime_error("BacktestEngine initial_cash must be finite");
   }
   if (config.quote_refresh_ns < 0) {
     throw std::runtime_error("BacktestEngine quote_refresh_ns must be non-negative");
+  }
+  for (const std::int64_t horizon_ns : config.adverse_selection_horizons_ns) {
+    if (horizon_ns <= 0) {
+      throw std::runtime_error("BacktestEngine adverse-selection horizons must be positive");
+    }
   }
 }
 
@@ -77,6 +100,44 @@ void process_intents(const std::vector<execution::OrderIntent> &intents,
   }
 }
 
+std::int64_t target_timestamp_ns(const execution::Fill &fill, const std::int64_t horizon_ns) {
+  if (fill.ts_ns > std::numeric_limits<std::int64_t>::max() - horizon_ns) {
+    throw std::runtime_error("BacktestEngine adverse-selection target timestamp overflows");
+  }
+  return fill.ts_ns + horizon_ns;
+}
+
+void enqueue_adverse_selection(const execution::Fill &fill,
+                               const std::vector<std::int64_t> &horizons_ns,
+                               PendingAdverseSelectionQueue &pending) {
+  for (const std::int64_t horizon_ns : horizons_ns) {
+    pending.push(PendingAdverseSelection{
+        .fill = fill,
+        .horizon_ns = horizon_ns,
+        .target_ts_ns = target_timestamp_ns(fill, horizon_ns),
+    });
+  }
+}
+
+void record_due_adverse_selection(const std::int64_t event_ts_ns, const book::OrderBook &book,
+                                  metrics::MetricsEngine &metrics,
+                                  PendingAdverseSelectionQueue &pending) {
+  if (pending.empty() || pending.top().target_ts_ns > event_ts_ns) {
+    return;
+  }
+
+  const std::optional<double> future_mid_price = book.mid();
+  if (!future_mid_price) {
+    return;
+  }
+
+  while (!pending.empty() && pending.top().target_ts_ns <= event_ts_ns) {
+    const PendingAdverseSelection entry = pending.top();
+    metrics.record_adverse_selection(entry.fill, entry.horizon_ns, *future_mid_price);
+    pending.pop();
+  }
+}
+
 void write_outputs(const std::filesystem::path &output_dir, const metrics::MetricsEngine &metrics,
                    const execution::OrderManager &orders,
                    const std::vector<execution::Fill> &fills) {
@@ -104,6 +165,7 @@ BacktestResult BacktestEngine::run(data::IDataSource &source,
   portfolio::Portfolio portfolio(config_.initial_cash);
   metrics::MetricsEngine metrics;
   std::vector<execution::Fill> all_fills;
+  PendingAdverseSelectionQueue pending_adverse_selection;
   std::optional<std::int64_t> last_strategy_call_ts_ns;
 
   const auto started_at = std::chrono::steady_clock::now();
@@ -112,11 +174,14 @@ BacktestResult BacktestEngine::run(data::IDataSource &source,
   while (source.next(event)) {
     data::count_event(event, counts);
     book.apply_event(event);
+    record_due_adverse_selection(event.ts_ns, book, metrics, pending_adverse_selection);
 
     const std::vector<execution::Fill> fills = fill_model.fill_active_orders(orders, event, book);
     for (const execution::Fill &fill : fills) {
       portfolio.apply_fill(fill);
       metrics.record_fill(fill, book.mid());
+      enqueue_adverse_selection(fill, config_.adverse_selection_horizons_ns,
+                                pending_adverse_selection);
       all_fills.push_back(fill);
     }
 

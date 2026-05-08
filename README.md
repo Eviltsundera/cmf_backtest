@@ -43,6 +43,9 @@ Implemented:
   config hash, and `run_metadata.json`.
 - Reporting layer with a Streamlit dashboard, multi-run comparison, sensitivity
   heatmaps, and static Markdown/PNG export for submission artifacts.
+- T14 experiment runner for baseline, A-S, microprice A-S, and 3x3x3
+  `gamma/k/beta` sensitivity grid, with final report and tracked heatmap
+  assets.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
   k-way merge, sample replay, order-book invariants, feature formulas, OMS
@@ -50,7 +53,7 @@ Implemented:
   look-ahead protection, fixed-spread, Avellaneda-Stoikov, microprice A-S
   strategy behavior, and sample replay throughput.
 
-Next planned task: T14, experiments and final report.
+Next planned task: T15, submission package.
 
 ## Repository Layout
 
@@ -63,8 +66,10 @@ Next planned task: T14, experiments and final report.
 |-- docs/
 |   |-- implementation_plan.md   # task tracker and DoD
 |   |-- data_audit.md            # raw data schema and sample audit
+|   |-- experiments.md           # experiment runbook
+|   |-- report.md                # final report
 |   `-- technical_documentation.md
-|-- scripts/python/              # dashboard and static report export
+|-- scripts/python/              # experiment runner, dashboard, static export
 `-- lob_backtester/
     |-- apps/                    # CLI entry points
     |-- configs/                 # YAML configs
@@ -162,6 +167,12 @@ python scripts/python/export_static.py --run data/sample_reports/avellaneda_stoi
 Generate fresh sample run artifacts into ignored `reports/` directories:
 
 ```bash
+python3 scripts/python/run_experiments.py
+```
+
+Or run the three base configs manually:
+
+```bash
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml \
   --override run.output_dir=reports/baseline_fixed
 ./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml \
@@ -194,6 +205,8 @@ python3 lob_backtester/scripts/python/audit.py --json-out data/sample/audit_summ
 
 - [Implementation plan](docs/implementation_plan.md)
 - [Technical documentation](docs/technical_documentation.md)
+- [Final report](docs/report.md)
+- [Experiments runbook](docs/experiments.md)
 - [Data audit](docs/data_audit.md)
 - [Backtester README](lob_backtester/README.md)
 - [Agent context](AGENTS.md)

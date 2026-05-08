@@ -230,7 +230,7 @@ MVP rule:
 - fill count и fill rate;
 - drawdown;
 - quoted spread и spread captured;
-- adverse-selection metrics на заданных горизонтах.
+- adverse-selection markout на горизонтах 1s и 10s.
 
 Текущие artifacts: `run_metadata.json`, `metrics.json`, `equity_curve.csv`,
 `inventory.csv`, `orders.csv`, `fills.csv`.
@@ -444,13 +444,16 @@ stdout.
 Reporting layer читает эти artifacts без дополнительной C++ сборки:
 
 ```bash
+python3 scripts/python/run_experiments.py
 streamlit run scripts/python/dashboard.py -- --reports-dir reports/
 streamlit run scripts/python/dashboard.py -- --reports-dir data/sample_reports
 python scripts/python/export_static.py --run data/sample_reports/avellaneda_stoikov
 ```
 
-`dashboard.py` поддерживает single-run и compare-mode, overview metrics,
-equity/drawdown, inventory, quoting diagnostics, fills table,
+`run_experiments.py` запускает три базовых strategy config'а и 3x3x3 grid по
+`gamma/k/beta`, пишет `reports/experiment_summary.md` и static sensitivity
+heatmaps. `dashboard.py` поддерживает single-run и compare-mode, overview
+metrics, equity/drawdown, inventory, quoting diagnostics, fills table,
 adverse-selection bars и sensitivity heatmaps для grid-run директорий.
 `export_static.py` пишет `summary.md` и `plots/*.png` в
 `reports/_static/<run>/` или рядом с указанным reports root, чтобы submission

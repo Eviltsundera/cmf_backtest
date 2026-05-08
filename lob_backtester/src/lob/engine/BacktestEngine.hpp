@@ -20,6 +20,7 @@ struct BacktestEngineConfig {
   execution::FillModelConfig fills;
   double initial_cash = 0.0;
   std::int64_t quote_refresh_ns = 0;
+  std::vector<std::int64_t> adverse_selection_horizons_ns = {1'000'000'000, 10'000'000'000};
   std::filesystem::path output_dir;
 };
 
