@@ -100,9 +100,9 @@ Sensitivity grid:
 | Mean PnL, `beta=0.5` | `-4213.944` |
 | Mean PnL, `beta=1.0` | `-4383.889` |
 
-![Final PnL by gamma and beta](docs/assets/final_pnl_gamma_beta.svg)
+![Strategy comparison dashboard](docs/assets/main_compare.png)
 
-![Final PnL by gamma and k](docs/assets/final_pnl_gamma_k.svg)
+![PnL comparison dashboard](docs/assets/pnl_comapre.png)
 
 Conclusions:
 
