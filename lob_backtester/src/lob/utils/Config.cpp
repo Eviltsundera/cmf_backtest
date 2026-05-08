@@ -323,6 +323,7 @@ AppConfig apply_overrides(AppConfig config, const std::vector<ConfigOverride> &o
 
 std::string describe_config(const AppConfig &config) {
   std::ostringstream out;
+  out << std::setprecision(std::numeric_limits<double>::max_digits10);
   out << "symbol=" << config.run.symbol << '\n';
   out << "input_path=" << config.run.input_path.string() << '\n';
   out << "output_dir=" << config.run.output_dir.string() << '\n';

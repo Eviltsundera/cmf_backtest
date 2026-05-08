@@ -63,7 +63,8 @@ add_library(
   src/lob/metrics/MetricsEngine.cpp
   src/lob/portfolio/Portfolio.cpp
   src/lob/strategies/Strategy.cpp
-  src/lob/utils/Config.cpp)
+  src/lob/utils/Config.cpp
+  src/lob/utils/GitMetadata.cpp)
 add_library(lob::core ALIAS lob_core)
 
 target_include_directories(lob_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -94,6 +95,7 @@ if(BUILD_TESTING)
     tests/fill_model_test.cpp
     tests/fixed_spread_strategy_test.cpp
     tests/feature_engine_test.cpp
+    tests/git_metadata_test.cpp
     tests/metrics_engine_test.cpp
     tests/order_manager_test.cpp
     tests/order_book_test.cpp

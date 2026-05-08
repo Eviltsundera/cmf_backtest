@@ -85,6 +85,18 @@ TEST(ConfigSmokeTest, AppliesOverridesToEffectiveConfig) {
   EXPECT_NE(lob::utils::config_hash(config), lob::utils::config_hash(overridden));
 }
 
+TEST(ConfigSmokeTest, HashesUseFullDoublePrecision) {
+  const auto path = std::filesystem::path(LOB_TEST_CONFIG_DIR) / "avellaneda_stoikov.yaml";
+  const lob::utils::AppConfig config = lob::utils::load_config(path);
+
+  const lob::utils::AppConfig first =
+      lob::utils::apply_overrides(config, {{"strategy.gamma", "0.01000001"}});
+  const lob::utils::AppConfig second =
+      lob::utils::apply_overrides(config, {{"strategy.gamma", "0.01000002"}});
+
+  EXPECT_NE(lob::utils::config_hash(first), lob::utils::config_hash(second));
+}
+
 TEST(ConfigSmokeTest, RejectsInvalidOverrideWithoutMutatingOriginal) {
   const auto path = std::filesystem::path(LOB_TEST_CONFIG_DIR) / "avellaneda_stoikov.yaml";
   const lob::utils::AppConfig config = lob::utils::load_config(path);
