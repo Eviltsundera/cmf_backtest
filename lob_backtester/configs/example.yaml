@@ -1,11 +1,11 @@
 run:
-  symbol: BTCUSDT
+  symbol: MD
   input_path: ../data/sample
   output_dir: artifacts/runs/example
 
 market:
-  tick_size: 0.01
-  lot_size: 0.000001
+  tick_size: 0.0000001
+  lot_size: 1.0
 
 book:
   max_depth: 50

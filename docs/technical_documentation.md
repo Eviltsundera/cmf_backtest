@@ -1,6 +1,6 @@
 # Техническая документация: LOB Backtester
 
-**Статус:** начальный draft, синхронизирован с T0 bootstrap.
+**Статус:** draft, синхронизирован с T2 DataLoader.
 
 Документ описывает целевую архитектуру CMF LOB backtesting engine и то, что уже
 есть в репозитории. Детальный task tracker остается в
@@ -25,20 +25,27 @@ latency и partial fills считаются расширениями, если �
 
 ## 2. Текущая реализация
 
-Сейчас кодовая база находится на уровне T0 bootstrap:
+Сейчас кодовая база находится на уровне T2 DataLoader:
 
 - `lob_backtester/CMakeLists.txt` определяет `lob_core`, `lob_backtest` и
   `lob_tests`.
 - `lob_backtester/src/lob/utils/Config.hpp` и `.cpp` загружают YAML-конфиг в
   типизированные структуры.
+- `lob_backtester/src/lob/data/MarketEvent.hpp` определяет нормализованный
+  market-event contract.
+- `lob_backtester/src/lob/data/DataSource.hpp` определяет `IDataSource` и
+  счетчики событий для replay/integration checks.
+- `lob_backtester/src/lob/data/CsvDataSource.hpp` и `.cpp` реализуют streaming
+  CSV loader с merge по `(ts_ns, seq)`.
 - `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, загружает YAML,
   логирует путь, печатает разобранные параметры и завершает работу.
-- `lob_backtester/configs/example.yaml` содержит smoke config.
-- `lob_backtester/tests/config_smoke_test.cpp` проверяет загрузку example
-  config.
+- `lob_backtester/configs/example.yaml` содержит smoke config, согласованный с
+  `docs/data_audit.md`.
+- `lob_backtester/tests/config_smoke_test.cpp` и
+  `lob_backtester/tests/data_source_test.cpp` проверяют config и DataLoader.
 
-Текущий CLI намеренно является smoke path. Data parser, order book, execution
-simulator, portfolio, metrics и strategies еще не реализованы.
+Текущий CLI намеренно остается smoke path. Order book, execution simulator,
+portfolio, metrics и strategies еще не реализованы.
 
 ## 3. Архитектура верхнего уровня
 
@@ -88,6 +95,15 @@ market data.
 - нормализовать prices и quantities к `tick_size` и `lot_size`;
 - валидировать монотонность timestamp и дубликаты;
 - стримить события без загрузки всего датасета в память.
+
+Текущая реализация:
+
+- `CsvDataSource` читает `lob.csv`, `trades.csv` и опциональный
+  `depth_updates.csv`;
+- `MarketEvent::ts_ns` хранит timestamp в ns;
+- `MarketEvent::seq` кодирует `(source_priority, row_id)`;
+- payload хранит prices как integer ticks и quantities как integer lots;
+- equal-timestamp priority: snapshot, depth update, trade.
 
 ### OrderBook
 
@@ -318,11 +334,10 @@ data используется для integration и throughput checks после
 
 Ближайшие задачи:
 
-1. T2: реализовать normalized market-event loading.
-2. T3: реализовать Market-By-Price order book.
-3. T4: реализовать order-book features и rolling volatility.
-4. T5-T8: добавить OMS, fills, portfolio, metrics и event loop.
-5. T9-T14: стратегии, конфиги, dashboard и финальные эксперименты.
+1. T3: реализовать Market-By-Price order book.
+2. T4: реализовать order-book features и rolling volatility.
+3. T5-T8: добавить OMS, fills, portfolio, metrics и event loop.
+4. T9-T14: стратегии, конфиги, dashboard и финальные эксперименты.
 
 Финальные deliverables:
 

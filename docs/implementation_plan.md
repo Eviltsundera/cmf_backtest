@@ -123,7 +123,7 @@ script scaffold. DoD проверен через временный toolchain в
 
 ---
 
-## T2. DataLoader: парсинг и нормализация event stream
+## T2. DataLoader: парсинг и нормализация event stream [done]
 
 **Цель:** читать сырые данные и отдавать унифицированный поток `MarketEvent` в порядке времени.
 
@@ -145,11 +145,20 @@ script scaffold. DoD проверен через временный toolchain в
 - Округление цены к `tick_size`, объёма к `lot_size` (конфигурируемо).
 
 **DoD:**
-- [ ] Юнит-тесты на парсинг каждого типа события.
-- [ ] Юнит-тест на детекцию нарушения монотонности `ts`.
-- [ ] Юнит-тест на k-way merge при нескольких источниках.
-- [ ] Интеграционный тест: на sample проходит весь файл без ошибок и количество событий соответствует ожиданию из audit.
-- [ ] Замер пропускной способности (events/sec) на sample, зафиксирован в [data_audit.md](data_audit.md).
+- [x] Юнит-тесты на парсинг каждого типа события.
+- [x] Юнит-тест на детекцию нарушения монотонности `ts`.
+- [x] Юнит-тест на k-way merge при нескольких источниках.
+- [x] Интеграционный тест: на sample проходит весь файл без ошибок и количество событий соответствует ожиданию из audit.
+- [x] Замер пропускной способности (events/sec) на sample, зафиксирован в [data_audit.md](data_audit.md).
+
+**Статус:** done 2026-05-08.
+
+**Итог:** добавлены `MarketEvent`, `IDataSource` и streaming `CsvDataSource`.
+Loader читает `lob.csv`, `trades.csv` и опциональный `depth_updates.csv`,
+нормализует timestamps в ns, prices в ticks, quantities в lots и делает merge
+по `(ts_ns, seq)` без загрузки всего датасета в память. На sample
+интеграционный тест прошел `757,667` событий; измеренная пропускная способность:
+`3,341,723 events/sec`.
 
 ---
 
@@ -590,6 +599,7 @@ script scaffold. DoD проверен через временный toolchain в
 ## Точки принятия решений (открытые вопросы)
 
 1. **Формат данных после T1.** Решено: `MD.zip` содержит CSV-only `lob.csv` и `trades.csv`; для MVP используем свой streaming CSV parser.
-2. **Preprocessing в бинарь.** Решено отложить: binary preprocessing добавлять только если T3 replay benchmark покажет bottleneck CSV-парсинга.
-3. **Walk-forward.** Данные покрывают 2024-08-01..2024-08-06 UTC; train/validation/test split возможен, конкретные границы выбрать в T14.
-4. **Bin-based microprice.** В MVP — proxy формулой. Bin-based — в roadmap.
+2. **DataLoader после T2.** Решено: C++ loader стримит CSV напрямую, делает k-way merge и хранит price/qty как integer ticks/lots.
+3. **Preprocessing в бинарь.** Решено отложить: binary preprocessing добавлять только если T3 replay benchmark покажет bottleneck CSV-парсинга.
+4. **Walk-forward.** Данные покрывают 2024-08-01..2024-08-06 UTC; train/validation/test split возможен, конкретные границы выбрать в T14.
+5. **Bin-based microprice.** В MVP — proxy формулой. Bin-based — в roadmap.

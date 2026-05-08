@@ -130,6 +130,24 @@ Both CSV sample files are below 50 MB. The sample covers all native event types
 available in the raw archive. It cannot cover native `depth_update` events
 because none exist in the source data.
 
+## C++ Loader Throughput
+
+Measured on 2026-05-08 with the integration test:
+
+```bash
+./build/lob_tests --gtest_filter=CsvDataSourceIntegrationTest.DrainsSampleWithAuditCounts
+```
+
+Result on `data/sample`:
+
+| Metric | Value |
+| --- | ---: |
+| Total events | 757,667 |
+| `book_snapshot_25` events | 7,200 |
+| `trade` events | 750,467 |
+| `depth_update` events | 0 |
+| Throughput | 3,341,723 events/sec |
+
 ## Preprocessing Decision
 
 MVP decision: parse raw CSV directly in the C++ engine.

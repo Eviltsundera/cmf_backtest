@@ -22,6 +22,13 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure
 ```
 
+If `ctest` is not available in the shell, the same test binary can be run
+directly:
+
+```bash
+./build/lob_tests
+```
+
 ## Run
 
 ```bash

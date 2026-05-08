@@ -64,14 +64,15 @@ find lob_backtester/apps lob_backtester/src lob_backtester/tests -name '*.cpp' -
 
 ## Текущее состояние
 
-T0 bootstrap и T1 data audit закрыты. Сейчас в репозитории есть:
+T0 bootstrap, T1 data audit и T2 DataLoader закрыты. Сейчас в репозитории есть:
 
 - CMake project с `lob_core`, `lob_backtest` и `lob_tests`.
 - YAML config loader в `lob::utils`.
+- Streaming CSV DataLoader в `lob::data`.
 - CLI smoke path: `lob_backtest --config <yaml>`.
-- Example config и один GoogleTest smoke test.
+- Example config, config smoke test и DataLoader tests.
 - `docs/data_audit.md` со схемой `MD.zip`.
 - `lob_backtester/scripts/python/audit.py` для аудита raw CSV и регенерации
   `data/sample/`.
 
-Следующая задача по плану: T2, DataLoader и нормализация event stream.
+Следующая задача по плану: T3, LOBBuilder и реконструкция Market-By-Price.

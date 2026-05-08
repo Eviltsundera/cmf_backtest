@@ -8,7 +8,7 @@ TEST(ConfigSmokeTest, LoadsExampleConfig) {
   const auto path = std::filesystem::path(LOB_TEST_CONFIG_DIR) / "example.yaml";
   const lob::utils::AppConfig config = lob::utils::load_config(path);
 
-  EXPECT_EQ(config.run.symbol, "BTCUSDT");
+  EXPECT_EQ(config.run.symbol, "MD");
   EXPECT_EQ(config.execution.fill_model, "price_cross");
   EXPECT_FALSE(config.execution.partial_fills);
   EXPECT_GT(config.market.tick_size, 0.0);

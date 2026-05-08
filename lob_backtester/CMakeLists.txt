@@ -52,7 +52,7 @@ else()
   set(LOB_YAML_TARGET yaml-cpp)
 endif()
 
-add_library(lob_core STATIC src/lob/utils/Config.cpp)
+add_library(lob_core STATIC src/lob/data/CsvDataSource.cpp src/lob/utils/Config.cpp)
 add_library(lob::core ALIAS lob_core)
 
 target_include_directories(lob_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -74,10 +74,13 @@ target_compile_options(
 
 include(CTest)
 if(BUILD_TESTING)
-  add_executable(lob_tests tests/config_smoke_test.cpp)
+  add_executable(lob_tests tests/config_smoke_test.cpp tests/data_source_test.cpp)
   target_link_libraries(lob_tests PRIVATE lob::core GTest::gtest_main)
   target_compile_definitions(
-    lob_tests PRIVATE LOB_TEST_CONFIG_DIR="${CMAKE_CURRENT_SOURCE_DIR}/configs")
+    lob_tests
+    PRIVATE
+      LOB_TEST_CONFIG_DIR="${CMAKE_CURRENT_SOURCE_DIR}/configs"
+      LOB_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../data/sample")
   target_compile_options(
     lob_tests
     PRIVATE
