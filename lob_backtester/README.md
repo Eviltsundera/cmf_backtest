@@ -36,16 +36,17 @@ directly:
 ```
 
 The CLI runs the configured CSV replay, prints a short run summary, and writes
-artifacts to `run.output_dir`. The fixed-spread baseline config is:
+artifacts to `run.output_dir`. Strategy configs are:
 
 ```bash
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
+./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
 ```
 
 Implemented engine modules currently include DataLoader, Market-By-Price
 OrderBook, FeatureEngine, Strategy interface, OrderManager, FillModel,
-Portfolio, MetricsEngine, BacktestEngine, NoopStrategy, and
-FixedSpreadStrategy.
+Portfolio, MetricsEngine, BacktestEngine, NoopStrategy, FixedSpreadStrategy,
+and AvellanedaStoikovStrategy.
 
 ## Documentation
 

@@ -1,6 +1,6 @@
 # Техническая документация: LOB Backtester
 
-**Статус:** draft, синхронизирован с T9 FixedSpreadStrategy.
+**Статус:** draft, синхронизирован с T10 AvellanedaStoikovStrategy.
 
 Документ описывает целевую архитектуру CMF LOB backtesting engine и то, что уже
 есть в репозитории. Детальный task tracker остается в
@@ -25,7 +25,7 @@ latency и partial fills считаются расширениями, если �
 
 ## 2. Текущая реализация
 
-Сейчас кодовая база находится на уровне T9 FixedSpreadStrategy:
+Сейчас кодовая база находится на уровне T10 AvellanedaStoikovStrategy:
 
 - `lob_backtester/CMakeLists.txt` определяет `lob_core`, `lob_backtest` и
   `lob_tests`.
@@ -50,16 +50,19 @@ latency и partial fills считаются расширениями, если �
 - `lob_backtester/src/lob/metrics/MetricsEngine.hpp` и `.cpp` агрегируют
   run metrics и пишут `metrics.json`, `equity_curve.csv`, `inventory.csv`.
 - `lob_backtester/src/lob/strategies/Strategy.hpp` и `.cpp` определяют
-  `IStrategy`, `MarketState`, `NoopStrategy` и `FixedSpreadStrategy`.
+  `IStrategy`, `MarketState`, `NoopStrategy`, `FixedSpreadStrategy`,
+  `AvellanedaStoikovStrategy` и тестируемую A-S formula helper.
 - `lob_backtester/src/lob/engine/BacktestEngine.hpp` и `.cpp` реализуют
   event loop, scheduler, strategy callbacks и `fills.csv`.
 - `lob_backtester/apps/lob_backtest.cpp` парсит `--config`, загружает YAML,
-  запускает CSV replay с `strategy.name: noop` или `fixed_spread`, печатает
-  summary и пишет artifacts в `run.output_dir`.
+  запускает CSV replay с `strategy.name: noop`, `fixed_spread` или
+  `avellaneda_stoikov`, печатает summary и пишет artifacts в `run.output_dir`.
 - `lob_backtester/configs/example.yaml` содержит smoke config, согласованный с
   `docs/data_audit.md`.
 - `lob_backtester/configs/baseline_fixed_spread.yaml` содержит sample run config
   для baseline fixed-spread стратегии.
+- `lob_backtester/configs/avellaneda_stoikov.yaml` содержит sample run config
+  для классической A-S стратегии.
 - `lob_backtester/tests/*_test.cpp` покрывают config, DataLoader, order book,
   features, OMS, fill model, portfolio accounting, metrics aggregation и
   engine integration.
@@ -257,6 +260,9 @@ strategy:
   gamma: 0.1
   sigma: 0.02
   k: 1.5
+  horizon_seconds: 3600.0
+  sigma_window_ms: 1000
+  min_spread_ticks: 2
   delta_ticks: 1
   order_qty: 1
   max_inventory: 10
@@ -264,10 +270,12 @@ strategy:
 ```
 
 Для fixed-spread baseline используется `strategy.name: fixed_spread`; CLI также
-поддерживает aliases `baseline_fixed` и `fixed`. `quote_refresh_ms` остается
-engine scheduler параметром, а `max_inventory` дополнительно прокидывается в
-OMS risk gate. Будущие задачи расширят схему настройками DataLoader,
-strategy-specific секциями, reporting settings, CLI overrides и run metadata.
+поддерживает aliases `baseline_fixed` и `fixed`. Для классической модели
+используется `strategy.name: avellaneda_stoikov`; aliases: `avellaneda`, `as`.
+`quote_refresh_ms` остается engine scheduler параметром, а `max_inventory`
+дополнительно прокидывается в OMS risk gate. Будущие задачи расширят схему
+настройками DataLoader, strategy-specific секциями, reporting settings, CLI
+overrides и run metadata.
 
 ## 6. Модели стратегий
 
@@ -312,6 +320,19 @@ ask = round_up(r_t + psi_t / 2, tick_size)
 Inventory `q` смещает reservation price. Положительный inventory должен
 двигать reservation price вниз, отрицательный inventory - вверх.
 
+Текущая реализация:
+
+- `AvellanedaStoikovStrategy` на каждом scheduled callback сначала снимает
+  старые заявки через `cancel_all`, затем строит новые maker quotes.
+- `sigma_window_ms` задает time-window rolling std по mid-returns; до
+  накопления двух returns используется стартовое значение `sigma` из YAML.
+- Rolling return std переводится в tick-volatility через умножение на текущий
+  mid, чтобы формула работала в price-tick units.
+- `horizon_seconds` интерпретируется как оставшееся время от первого
+  strategy callback; после истечения горизонта inventory term становится нулем.
+- `min_spread_ticks`, maker-only checks и `max_inventory` защищают от crossed
+  quotes и неконтролируемого inventory.
+
 ### Microprice Extension
 
 Microprice variant корректирует fair price через imbalance:
@@ -334,6 +355,7 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure
 ./build/lob_backtest --config lob_backtester/configs/example.yaml
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
+./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
 ```
 
 Проверка форматирования:
@@ -406,8 +428,9 @@ data используется для integration и throughput checks после
 
 Ближайшие задачи:
 
-1. T10: добавить Avellaneda-Stoikov strategy.
-2. T11-T14: конфиги, dashboard, эксперименты, отчет и финальная полировка.
+1. T11: добавить microprice extension.
+2. T12-T14: CLI/config polish, dashboard, эксперименты, отчет и финальная
+   полировка.
 
 Финальные deliverables:
 

@@ -87,6 +87,7 @@ include(CTest)
 if(BUILD_TESTING)
   add_executable(
     lob_tests
+    tests/avellaneda_stoikov_strategy_test.cpp
     tests/backtest_engine_test.cpp
     tests/config_smoke_test.cpp
     tests/data_source_test.cpp

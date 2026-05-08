@@ -26,3 +26,20 @@ TEST(ConfigSmokeTest, LoadsBaselineFixedSpreadConfig) {
   EXPECT_EQ(config.run.output_dir,
             std::filesystem::path("lob_backtester/artifacts/runs/baseline_fixed"));
 }
+
+TEST(ConfigSmokeTest, LoadsAvellanedaStoikovConfig) {
+  const auto path = std::filesystem::path(LOB_TEST_CONFIG_DIR) / "avellaneda_stoikov.yaml";
+  const lob::utils::AppConfig config = lob::utils::load_config(path);
+
+  EXPECT_EQ(config.strategy.name, "avellaneda_stoikov");
+  EXPECT_GT(config.strategy.gamma, 0.0);
+  EXPECT_GE(config.strategy.sigma, 0.0);
+  EXPECT_GT(config.strategy.k, 0.0);
+  EXPECT_GT(config.strategy.horizon_seconds, 0.0);
+  EXPECT_GT(config.strategy.sigma_window_ms, 0);
+  EXPECT_EQ(config.strategy.min_spread_ticks, 2);
+  EXPECT_EQ(config.strategy.order_qty, 1);
+  EXPECT_EQ(config.strategy.max_inventory, 10);
+  EXPECT_EQ(config.run.output_dir,
+            std::filesystem::path("lob_backtester/artifacts/runs/avellaneda_stoikov"));
+}

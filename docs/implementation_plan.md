@@ -417,10 +417,23 @@ focused BacktestEngine/Config tests для fixed-spread, полный `ctest`,
 - Параметры: `gamma`, `k`, `horizon_seconds`, `sigma_window_ms`, `order_qty`.
 
 **DoD:**
-- [ ] Юнит-тесты на формулы: при `q=0` reservation = mid; при `q>0` reservation < mid; при `q<0` > mid.
-- [ ] При росте `γ` ИЛИ `σ` total spread растёт.
-- [ ] При `(T-t)→0` total spread → `(2/γ)*ln(1+γ/k)` (без inventory term).
-- [ ] Прогон на sample → `reports/avellaneda_stoikov/`.
+- [x] Юнит-тесты на формулы: при `q=0` reservation = mid; при `q>0` reservation < mid; при `q<0` > mid.
+- [x] При росте `γ` ИЛИ `σ` total spread растёт.
+- [x] При `(T-t)→0` total spread → `(2/γ)*ln(1+γ/k)` (без inventory term).
+- [x] Прогон на sample → `lob_backtester/artifacts/runs/avellaneda_stoikov/` (ignored artifacts).
+
+**Итог:** добавлен `lob::strategies::AvellanedaStoikovStrategy` и
+`compute_avellaneda_stoikov_quote` для тестируемой формулы. Стратегия считает
+reservation price и total spread по A-S 2008, поддерживает rolling std
+mid-returns через `sigma_window_ms`, стартовую `sigma`, `horizon_seconds`,
+`min_spread_ticks`, inventory guard и maker-only quote guards. CLI поддерживает
+`strategy.name: avellaneda_stoikov` с aliases `avellaneda` и `as`; добавлен
+sample config `lob_backtester/configs/avellaneda_stoikov.yaml`.
+
+Проверено: `cmake --build build -j2`,
+`./build/lob_tests --gtest_filter='AvellanedaStoikov*' --gtest_color=no`,
+focused Config/BacktestEngine integration для A-S, CLI sample run,
+полный `ctest`, `clang-format --dry-run --Werror`, `git diff --check`.
 
 ---
 

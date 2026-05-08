@@ -31,14 +31,17 @@ Implemented:
   artifacts including `orders.csv` and `fills.csv`.
 - Fixed-spread baseline strategy with YAML config, inventory guard, maker-only
   risk validation, synthetic PnL test, and sample artifact smoke coverage.
+- Avellaneda-Stoikov strategy with formula tests, rolling mid-return
+  volatility, inventory guard, maker-only validation, YAML config, and sample
+  artifact smoke coverage.
 - Data audit and deterministic one-hour sample under `data/sample/`.
 - GoogleTest coverage for config loading, event parsing, timestamp validation,
   k-way merge, sample replay, order-book invariants, feature formulas, OMS
   lifecycle/fill rules, portfolio accounting, run metrics, engine integration,
-  look-ahead protection, fixed-spread strategy behavior, and sample replay
-  throughput.
+  look-ahead protection, fixed-spread and Avellaneda-Stoikov strategy behavior,
+  and sample replay throughput.
 
-Next planned task: T10, Avellaneda-Stoikov strategy.
+Next planned task: T11, Microprice extension.
 
 ## Repository Layout
 
@@ -97,10 +100,11 @@ and records loader and engine throughput.
 ```
 
 The CLI runs the configured CSV replay and writes run artifacts to
-`run.output_dir`. A fixed-spread baseline run is available via:
+`run.output_dir`. Strategy configs are available via:
 
 ```bash
 ./build/lob_backtest --config lob_backtester/configs/baseline_fixed_spread.yaml
+./build/lob_backtest --config lob_backtester/configs/avellaneda_stoikov.yaml
 ```
 
 ## Data

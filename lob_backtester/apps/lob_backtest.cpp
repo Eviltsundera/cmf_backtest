@@ -53,6 +53,10 @@ bool is_fixed_spread_strategy(const std::string_view name) {
   return name == "fixed_spread" || name == "baseline_fixed" || name == "fixed";
 }
 
+bool is_avellaneda_stoikov_strategy(const std::string_view name) {
+  return name == "avellaneda_stoikov" || name == "avellaneda" || name == "as";
+}
+
 std::int64_t milliseconds_to_nanoseconds(const std::int64_t milliseconds) {
   constexpr std::int64_t kNsPerMs = 1'000'000;
   if (milliseconds > std::numeric_limits<std::int64_t>::max() / kNsPerMs ||
@@ -79,7 +83,8 @@ engine_config_from_app_config(const lob::utils::AppConfig &config) {
   if (config.strategy.max_inventory > 0) {
     engine_config.orders.risk.max_inventory_lots = config.strategy.max_inventory;
   }
-  if (is_fixed_spread_strategy(config.strategy.name)) {
+  if (is_fixed_spread_strategy(config.strategy.name) ||
+      is_avellaneda_stoikov_strategy(config.strategy.name)) {
     engine_config.orders.risk.strict_maker = true;
   }
   return engine_config;
@@ -97,6 +102,18 @@ make_strategy(const lob::utils::StrategyConfig &config) {
     strategy_config.order_quantity_lots = config.order_qty;
     strategy_config.max_inventory_lots = config.max_inventory;
     return std::make_unique<lob::strategies::FixedSpreadStrategy>(strategy_config);
+  }
+  if (is_avellaneda_stoikov_strategy(name)) {
+    lob::strategies::AvellanedaStoikovStrategyConfig strategy_config;
+    strategy_config.gamma = config.gamma;
+    strategy_config.initial_sigma = config.sigma;
+    strategy_config.k = config.k;
+    strategy_config.horizon_seconds = config.horizon_seconds;
+    strategy_config.sigma_window_ms = config.sigma_window_ms;
+    strategy_config.min_spread_ticks = config.min_spread_ticks;
+    strategy_config.order_quantity_lots = config.order_qty;
+    strategy_config.max_inventory_lots = config.max_inventory;
+    return std::make_unique<lob::strategies::AvellanedaStoikovStrategy>(strategy_config);
   }
   throw std::runtime_error("Strategy is not implemented yet: " + std::string(name));
 }
